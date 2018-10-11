@@ -7,6 +7,8 @@
 // else, eliminate the candidate with the fewest votes (NOT done)
 // if there is a tie for fewest votes, it should handle tiebreaking by looking at 2nd, 3rd choice etc. (NOT done)
 // then it should eliminate the proper candidate (done - eliminate specific candidate method) and return the new vote tallies (done)
+
+// try/catch block for createBallotBox eliminateCandidate method, with catch block break statement?
 // ===============================================================================
 
 // ballot factory function that accepts votes (array of natural numbers) as an argument
