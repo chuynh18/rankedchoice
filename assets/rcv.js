@@ -1,10 +1,18 @@
 "use strict";
 
-// ballot factory function
-// accepts votes (array of natural numbers)
-// number of elements in votes is how many "candidates" you're voting for
-// order of elements is preference
-// e.g. votes === [4, 2, 1, 0, 3] means there are five candidates with the first choice (index 0) being candidate 4
+// ===============================================================================
+// to-do:  create a ballotBox method to run one round of ranked choice voting
+// that means it has to tally up the votes (done)
+// return the winner if one candidate has over 50% votes (NOT done)
+// else, eliminate the candidate with the fewest votes (NOT done)
+// if there is a tie for fewest votes, it should handle tiebreaking by looking at 2nd, 3rd choice etc. (NOT done)
+// then it should eliminate the proper candidate (done - eliminate specific candidate method) and return the new vote tallies (done)
+// ===============================================================================
+
+// ballot factory function that accepts votes (array of natural numbers) as an argument
+// the length of votes is the number of candidates that you're voting for
+// and the order of the elements is the preference e.g. votes === [4, 2, 1, 0, 3] means there are five candidates
+// first choice is candidate #4, second is candidate #2, 3rd choice is candidate #1, and so on
 const createBallot = function(votes) {
    const ballot = {
       // votes holds the unmodified ballot
@@ -19,7 +27,9 @@ const createBallot = function(votes) {
             throw new Error(`Error: candidateNumber ${candidateNumber} has already been eliminated.`);
          }
       },
-      // takes into account the eliminated candidates and returns the candidate that this ballot is currently voting for
+      // takes into account the eliminated candidates and returns the candidateNum+1 place candidate
+      // that is, if candidateNum === 0, returns the current still-alive 1st place candidate
+      // if candidateNum === 1, returns the current 2nd place still-alive candidate
       returnCandidate: function(candidateNum) {
          const modifiedVotes = [];
 
