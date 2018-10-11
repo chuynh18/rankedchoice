@@ -16,9 +16,15 @@
 // and the order of the elements is the preference e.g. votes === [4, 2, 1, 0, 3] means there are five candidates
 // first choice is candidate #4, second is candidate #2, 3rd choice is candidate #1, and so on
 const createBallot = function(votes) {
+   // votes array contains the unmodified ballot - this is a private variable
+   const voteBallot = votes;
+
    const ballot = {
-      // votes holds the unmodified ballot
-      votes: votes,
+      // returns the unmodified ballot - this is a "getter" for the voteBallot array
+      // since I never defined a setter, you can think of voteBallot as being private and immutable
+      returnVotes: function() {
+         return voteBallot;
+      },
       // eliminatedCandidates is an array of candidates that have been eliminated during the RCV process
       eliminatedCandidates: [],
       // method to add an eliminated candidate to the eliminatedCandidates array
@@ -34,19 +40,22 @@ const createBallot = function(votes) {
       // if candidateNum === 1, returns the current 2nd place still-alive candidate
       returnCandidate: function(candidateNum) {
          const modifiedVotes = [];
+         const votes = this.returnVotes();
 
-         for (let i = 0; i < this.votes.length; i++) {
+         // default candidateNum to 0
+         if (typeof candidateNum === "undefined") {
+            candidateNum = 0;
+         }
+
+         for (let i = 0; i < votes.length; i++) {
             let candidateEliminated = false;
 
-            for (let j = 0; j < this.eliminatedCandidates.length; j++) {
-               if (this.votes[i] === this.eliminatedCandidates[j]) {
-                  candidateEliminated = true;
-                  break;
-               }
+            if (this.eliminatedCandidates.indexOf(votes[i]) !== -1) {
+               candidateEliminated = true;
             }
 
             if (!candidateEliminated) {
-               modifiedVotes[modifiedVotes.length] = this.votes[i];
+               modifiedVotes[modifiedVotes.length] = votes[i];
             }
          }
 
@@ -122,7 +131,7 @@ const createBallotBox = function() {
       // console.log all ballots in ballotBox
       debugEnumerateVotes: function() {
          for (let i = 0; i < this.ballotBox.length; i++) {
-            console.log(this.ballotBox[i].votes);
+            console.log(this.ballotBox[i].returnVotes());
          }
       }
    }
