@@ -86,6 +86,10 @@ const createBallotBox = function() {
       resetBallotBox: function() {
          ballotBox.length = 0;
       },
+      // returns the number of ballots in ballotBox
+      getNumBallots: function() {
+         return ballotBox.length;
+      },
       // iterates through the ballotBox and tallies up the votes
       // placeNumber is the desired place of the candidate
       // e.g. placeNumber === 0 returns the first place candidate, 1 returns the runner-up, etc.
@@ -108,11 +112,15 @@ const createBallotBox = function() {
       },
       // eliminates a specific candidate on all ballots in ballotBox
       eliminateCandidate: function(candidateNumber) {
-         for (let i = 0; i < ballotBox.length; i++) {
-            ballotBox[i].addEliminatedCandidate(candidateNumber);
+         if (typeof candidateNumber === "undefined") {
+            throw new Error("Error:  candidateNumber is undefined");
+         } else {
+            for (let i = 0; i < ballotBox.length; i++) {
+               ballotBox[i].addEliminatedCandidate(candidateNumber);
+            }
          }
       },
-      // adds one user-defined ballot
+      // adds one user-defined ballot (remember, votes is an array - see comment above createBallot factory function)
       addOneBallot: function(votes) {
          ballotBox[ballotBox.length] = createBallot(votes);
       },
