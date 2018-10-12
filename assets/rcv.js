@@ -1,13 +1,6 @@
 "use strict";
 
 // ===============================================================================
-// to-do:  create a ballotBox method to run one round of ranked choice voting
-// that means it has to tally up the votes (done)
-// return the winner if one candidate has over 50% votes (NOT done)
-// else, eliminate the candidate with the fewest votes (NOT done)
-// if there is a tie for fewest votes, it should handle tiebreaking by looking at 2nd, 3rd choice etc. (NOT done)
-// then it should eliminate the proper candidate (done - eliminate specific candidate method) and return the new vote tallies (done)
-
 // try/catch block for createBallotBox eliminateCandidate method, with catch block break statement?
 // ===============================================================================
 
