@@ -17,13 +17,13 @@
 // first choice is candidate #4, second is candidate #2, 3rd choice is candidate #1, and so on
 const createBallot = function(votes) {
    // votes array contains the unmodified ballot - this is a private variable
-   const voteBallot = votes;
+   const ballot = votes;
 
-   const ballot = {
-      // returns the unmodified ballot - this is a "getter" for the voteBallot array
-      // since I never defined a setter, you can think of voteBallot as being private and immutable
+   const self = {
+      // returns the unmodified ballot - this is a "getter" for the ballot array
+      // since I never defined a setter, you can think of ballot as being private and immutable
       returnVotes: function() {
-         return voteBallot;
+         return ballot;
       },
       // eliminatedCandidates is an array of candidates that have been eliminated during the RCV process
       eliminatedCandidates: [],
@@ -65,25 +65,42 @@ const createBallot = function(votes) {
       }
    };
 
-   return ballot;
+   return self;
 }
 
 // ballot box factory function
 const createBallotBox = function() {
-   const box = {
-      // holds ballots
-      ballotBox: [],
+   // holds ballot objects in a private variable
+   const ballotBox = [];
+
+   const self = {
+      // ballotBox getter
+      getBallotBox: function() {
+         return ballotBox;
+      },
+      // ballotBox setter
+      addToBallotBox: function(ballot) {
+         ballotBox[ballotBox.length] = ballot;
+      },
+      // empties ballotBox (in effect resetting the state of the RCV site)
+      resetBallotBox: function() {
+         ballotBox.length = 0;
+      },
       // iterates through the ballotBox and tallies up the votes
       // placeNumber is the desired place of the candidate
       // e.g. placeNumber === 0 returns the first place candidate, 1 returns the runner-up, etc.
       tallyVotes: function(placeNumber) {
          const result = {};
 
-         for (let i = 0; i < this.ballotBox.length; i++) {
-            if (typeof result[this.ballotBox[i].returnCandidate(placeNumber)] === "undefined") {
-               result[this.ballotBox[i].returnCandidate(placeNumber)] = 1;
+         if (typeof placeNumber === "undefined") {
+            console.log("Warning:  placeNumber is undefined; defaulting to 0");
+         }
+
+         for (let i = 0; i < ballotBox.length; i++) {
+            if (typeof result[ballotBox[i].returnCandidate(placeNumber)] === "undefined") {
+               result[ballotBox[i].returnCandidate(placeNumber)] = 1;
             } else {
-               result[this.ballotBox[i].returnCandidate(placeNumber)]++;
+               result[ballotBox[i].returnCandidate(placeNumber)]++;
             }
          }
 
@@ -91,13 +108,13 @@ const createBallotBox = function() {
       },
       // eliminates a specific candidate on all ballots in ballotBox
       eliminateCandidate: function(candidateNumber) {
-         for (let i = 0; i < this.ballotBox.length; i++) {
-            this.ballotBox[i].addEliminatedCandidate(candidateNumber);
+         for (let i = 0; i < ballotBox.length; i++) {
+            ballotBox[i].addEliminatedCandidate(candidateNumber);
          }
       },
       // adds one user-defined ballot
       addOneBallot: function(votes) {
-         this.ballotBox[this.ballotBox.length] = createBallot(votes);
+         ballotBox[ballotBox.length] = createBallot(votes);
       },
       // adds numBallots number of user-defined ballots
       addMultipleBallots: function(numBallots, votes) {
@@ -120,7 +137,7 @@ const createBallotBox = function() {
          }
 
          // add scrambled ballot into ballotBox
-         this.ballotBox[this.ballotBox.length] = createBallot(ballot);
+         ballotBox[ballotBox.length] = createBallot(ballot);
       },
       // adds numBallots number of randomized ballots, each with numCandidates number of candidates
       addMultipleRandomBallots: function(numBallots, numCandidates) {
@@ -130,13 +147,13 @@ const createBallotBox = function() {
       },
       // console.log all ballots in ballotBox
       debugEnumerateVotes: function() {
-         for (let i = 0; i < this.ballotBox.length; i++) {
-            console.log(this.ballotBox[i].returnVotes());
+         for (let i = 0; i < ballotBox.length; i++) {
+            console.log(ballotBox[i].returnVotes());
          }
       }
    }
 
-   return box;
+   return self;
 }
 
 // create ballot box object as "box"
