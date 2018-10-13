@@ -24,12 +24,14 @@ const createBallotBox = function() {
          const currentBallot = ballotBox[ballotBoxKeys[i]].array;
          const modifiedBallot = [];
 
+         // ensure we don't count eliminated candidates
          for (let j = 0; j < currentBallot.length; j++) {
             if (eliminatedCandidates.indexOf(currentBallot[j]) === -1) {
                modifiedBallot[modifiedBallot.length] = currentBallot[j];
             }
          }
 
+         // this is where we actually count votes
          if (typeof result[modifiedBallot[placeNumber]] === "undefined") {
             result[modifiedBallot[placeNumber]] = ballotBox[ballotBoxKeys[i]].count;
          } else {
@@ -42,7 +44,7 @@ const createBallotBox = function() {
 
    // private method that eliminates a specific candidate on all ballots in ballotBox
    const eliminateCandidate = function(candidateNumber) {
-      // make sure typeof candidateNumber === "number"
+      // explicit type coercion:  make sure typeof candidateNumber === "number"
       candidateNumber = Number(candidateNumber);
 
       if (typeof candidateNumber === "undefined") {
@@ -54,6 +56,7 @@ const createBallotBox = function() {
       }
    }
 
+   // object to be returned with its public methods
    const self = {
       // ballotBox getter
       getBallotBox: function() {
@@ -117,6 +120,7 @@ const createBallotBox = function() {
             }
 
             // handle ties for last place
+            // opportunity to make the code more robust by handling repeated ties
             if (losingCandidate.length > 1) {
                const tiebreaker = tallyVotes(1);
                let minTiebreakerVotes = tiebreaker[losingCandidate[0]];
@@ -193,24 +197,14 @@ const createBallotBox = function() {
          }
       },
 
+      // this arguably could be made a private method...  "I'll think about it." - Adam Jensen in Deus Ex:  Human Revolution
       resetEliminatedCandidates: function() {
          eliminatedCandidates.length = 0;
       },
 
       // console.log all ballots in ballotBox
       debugEnumerateVotes: function(force) {
-
-         // not useful to console.log out too many things - in fact the threshold is probably well below 1000
-         // also gating this for performance reasons, don't want you to shoot yourself in the foot and lock up your browser
-         if (ballotBox.length > 1000 && !force) {
-            console.log('Warning:  ballotBox.length > 1000; not displaying contents of ballotBox for performance and practical reasons.  To force display, call "debugEnumerateVotes(true)".');
-         } else if (ballotBox.length === 0) {
-            console.log("ballotBox.length === 0 (i.e. ballotBox is empty!)");
-         } else {
-            for (let i = 0; i < ballotBox.length; i++) {
-               console.log(ballotBox[i].returnVotes());
-            }
-         }
+         console.log(ballotBox);
       }
    }
 
