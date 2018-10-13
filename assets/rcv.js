@@ -12,9 +12,6 @@ const createBallot = function(votes) {
    // votes array contains the unmodified ballot - this is a private variable
    const ballot = votes;
 
-   // eliminatedCandidates is an array of candidates that have been eliminated during the RCV process
-   const eliminatedCandidates = [];
-
    // ballot object to be returned by createBallot factory function
    const self = {
       // returns the unmodified ballot - this is a "getter" for the ballot array
@@ -22,48 +19,6 @@ const createBallot = function(votes) {
       returnVotes: function() {
          return ballot;
       },
-
-      // method to add an eliminated candidate to the eliminatedCandidates array
-      addEliminatedCandidate: function(candidateNumber) {
-         if (eliminatedCandidates.indexOf(candidateNumber) === -1) {
-            eliminatedCandidates[eliminatedCandidates.length] = candidateNumber;
-         } else {
-            throw new Error(`argument candidateNumber ${candidateNumber} has already been eliminated.`);
-         }
-      },
-
-      resetEliminatedCandidates: function() {
-         eliminatedCandidates.length = 0;
-      },
-
-      // takes into account the eliminated candidates and returns the candidateNum+1 place candidate
-      // that is, if candidateNum === 0, returns the current still-alive 1st place candidate
-      // if candidateNum === 1, returns the current 2nd place still-alive candidate
-      returnCandidate: function(candidateNum) {
-         const modifiedVotes = [];
-         const votes = this.returnVotes();
-
-         // default candidateNum to 0
-         if (typeof candidateNum === "undefined") {
-            candidateNum = 0;
-         }
-
-         for (let i = 0; i < votes.length; i++) {
-            let candidateEliminated = false;
-
-            if (eliminatedCandidates.indexOf(votes[i]) !== -1) {
-               candidateEliminated = true;
-            }
-
-            if (!candidateEliminated) {
-               modifiedVotes[modifiedVotes.length] = votes[i];
-            }
-         }
-
-         if (modifiedVotes.length > 0) {
-            return modifiedVotes[candidateNum];
-         }
-      }
    };
 
    return self;
@@ -74,15 +29,56 @@ const createBallotBox = function() {
    // holds ballot objects in a private variable
    const ballotBox = [];
 
+   // holds eliminated candidates
+   const eliminatedCandidates = [];
+   
+   // private method that iterates through the ballotBox and tallies up the votes
+   // placeNumber is the desired place of the candidate
+   // e.g. placeNumber === 0 returns the first place candidate, 1 returns the runner-up, etc.
+   const tallyVotes = function(placeNumber) {
+      const result = {};
+
+      if (typeof placeNumber === "undefined") {
+         // code for defaulting to 0 lives in returnCandidate method of createBallot factory
+         // warning lives here so that it doesn't spam inside a for loop
+         console.log("Warning:  argument placeNumber is undefined; defaulting to 0.");
+      }
+   
+      // iterate through ballotBox and tally up the votes by using the returnCandidate method
+      // and then storing the returned value inside the result object
+      for (let i = 0; i < ballotBox.length; i++) {
+         const currentBallot = ballotBox[i].returnVotes();
+         const modifiedBallot = [];
+
+         for (let j = 0; j < currentBallot.length; j++) {
+            if (eliminatedCandidates.indexOf(currentBallot[j]) === -1) {
+               modifiedBallot[modifiedBallot.length] = currentBallot[j];
+            }
+         }
+
+         if (typeof result[modifiedBallot[placeNumber]] === "undefined") {
+            result[modifiedBallot[placeNumber]] = 1;
+         } else {
+            result[modifiedBallot[placeNumber]]++;
+         }
+      }
+
+      return result;
+   }
+
+   // private method that eliminates a specific candidate on all ballots in ballotBox
+   const eliminateCandidate = function(candidateNumber) {
+      if (typeof candidateNumber === "undefined") {
+         throw new Error("argument candidateNumber is undefined.");
+      } else {
+         eliminatedCandidates[eliminatedCandidates.length] = candidateNumber;
+      }
+   }
+
    const self = {
       // ballotBox getter
       getBallotBox: function() {
          return ballotBox;
-      },
-
-      // ballotBox setter
-      addToBallotBox: function(ballot) {
-         ballotBox[ballotBox.length] = ballot;
       },
 
       // empties ballotBox (in effect resetting the state of the RCV site)
@@ -93,42 +89,6 @@ const createBallotBox = function() {
       // returns the number of ballots in ballotBox
       getNumBallots: function() {
          return ballotBox.length;
-      },
-
-      // iterates through the ballotBox and tallies up the votes
-      // placeNumber is the desired place of the candidate
-      // e.g. placeNumber === 0 returns the first place candidate, 1 returns the runner-up, etc.
-      tallyVotes: function(placeNumber) {
-         const result = {};
-
-         if (typeof placeNumber === "undefined") {
-            // code for defaulting to 0 lives in returnCandidate method of createBallot factory
-            // warning lives here so that it doesn't spam inside a for loop
-            console.log("Warning:  argument placeNumber is undefined; defaulting to 0.");
-         }
-
-         // iterate through ballotBox and tally up the votes by using the returnCandidate method
-         // and then storing the returned value inside the result object
-         for (let i = 0; i < ballotBox.length; i++) {
-            if (typeof result[ballotBox[i].returnCandidate(placeNumber)] === "undefined") {
-               result[ballotBox[i].returnCandidate(placeNumber)] = 1;
-            } else {
-               result[ballotBox[i].returnCandidate(placeNumber)]++;
-            }
-         }
-
-         return result;
-      },
-
-      // eliminates a specific candidate on all ballots in ballotBox
-      eliminateCandidate: function(candidateNumber) {
-         if (typeof candidateNumber === "undefined") {
-            throw new Error("argument candidateNumber is undefined");
-         } else {
-            for (let i = 0; i < ballotBox.length; i++) {
-               ballotBox[i].addEliminatedCandidate(candidateNumber);
-            }
-         }
       },
 
       // runs RCV algorithm and returns complete election results
@@ -143,7 +103,7 @@ const createBallotBox = function() {
             const losingCandidate = [];
 
             // store results of current round into electionResults object
-            electionResults["round"+round] = this.tallyVotes(0);
+            electionResults["round"+round] = tallyVotes(0);
 
             // determine existence and identity of overall winner
             const electionResultsKeys = Object.keys(electionResults["round"+round]);
@@ -169,7 +129,7 @@ const createBallotBox = function() {
 
             // handle ties for last place
             if (losingCandidate.length > 1) {
-               const tiebreaker = this.tallyVotes(1);
+               const tiebreaker = tallyVotes(1);
                let minTiebreakerVotes = tiebreaker[losingCandidate[0]];
                let loser = losingCandidate[0];
 
@@ -180,10 +140,10 @@ const createBallotBox = function() {
                   }
                }
 
-               this.eliminateCandidate(loser);
+               eliminateCandidate(loser);
                electionResults["round"+round].eliminatedThisRound = loser;
             } else {
-               this.eliminateCandidate(losingCandidate[0]);
+               eliminateCandidate(losingCandidate[0]);
                electionResults["round"+round].eliminatedThisRound = losingCandidate[0];
             }
 
@@ -229,9 +189,7 @@ const createBallotBox = function() {
       },
 
       resetEliminatedCandidates: function() {
-         for (let i = 0; i < ballotBox.length; i++) {
-            ballotBox[i].resetEliminatedCandidates();
-         }
+         eliminatedCandidates.length = 0;
       },
 
       // console.log all ballots in ballotBox
@@ -240,7 +198,9 @@ const createBallotBox = function() {
          // not useful to console.log out too many things - in fact the threshold is probably well below 1000
          // also gating this for performance reasons, don't want you to shoot yourself in the foot and lock up your browser
          if (ballotBox.length > 1000 && !force) {
-            console.log('ballotBox.length > 1000; not displaying contents of ballotBox for performance and practical reasons.  To force display, call "debugEnumerateVotes(true)".');
+            console.log('Warning:  ballotBox.length > 1000; not displaying contents of ballotBox for performance and practical reasons.  To force display, call "debugEnumerateVotes(true)".');
+         } else if (ballotBox.length === 0) {
+            console.log("ballotBox.length === 0 (i.e. ballotBox is empty!)");
          } else {
             for (let i = 0; i < ballotBox.length; i++) {
                console.log(ballotBox[i].returnVotes());
