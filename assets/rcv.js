@@ -1,33 +1,9 @@
 "use strict";
 
-// ===============================================================================
-// try/catch block for createBallotBox eliminateCandidate method, with catch block break statement?
-// ===============================================================================
-
-// ballot factory function that accepts votes (array of natural numbers) as an argument
-// the length of votes is the number of candidates that you're voting for
-// and the order of the elements is the preference e.g. votes === [4, 2, 1, 0, 3] means there are five candidates
-// first choice is candidate #4, second is candidate #2, 3rd choice is candidate #1, and so on
-const createBallot = function(votes) {
-   // votes array contains the unmodified ballot - this is a private variable
-   const ballot = votes;
-
-   // ballot object to be returned by createBallot factory function
-   const self = {
-      // returns the unmodified ballot - this is a "getter" for the ballot array
-      // since I never defined a setter, you can think of ballot as being private and immutable
-      returnVotes: function() {
-         return ballot;
-      },
-   };
-
-   return self;
-}
-
 // ballot box factory function
 const createBallotBox = function() {
-   // holds ballot objects in a private variable
-   const ballotBox = [];
+   // holds ballots in a private variable
+   let ballotBox = {};
 
    // holds eliminated candidates
    const eliminatedCandidates = [];
@@ -37,17 +13,15 @@ const createBallotBox = function() {
    // e.g. placeNumber === 0 returns the first place candidate, 1 returns the runner-up, etc.
    const tallyVotes = function(placeNumber) {
       const result = {};
+      const ballotBoxKeys = Object.keys(ballotBox);
 
       if (typeof placeNumber === "undefined") {
-         // code for defaulting to 0 lives in returnCandidate method of createBallot factory
-         // warning lives here so that it doesn't spam inside a for loop
          console.log("Warning:  argument placeNumber is undefined; defaulting to 0.");
       }
-   
-      // iterate through ballotBox and tally up the votes by using the returnCandidate method
-      // and then storing the returned value inside the result object
-      for (let i = 0; i < ballotBox.length; i++) {
-         const currentBallot = ballotBox[i].returnVotes();
+
+      // iterate through ballotBox and tally up the votes
+      for (let i = 0; i < ballotBoxKeys.length; i++) {
+         const currentBallot = ballotBox[ballotBoxKeys[i]].array;
          const modifiedBallot = [];
 
          for (let j = 0; j < currentBallot.length; j++) {
@@ -57,9 +31,9 @@ const createBallotBox = function() {
          }
 
          if (typeof result[modifiedBallot[placeNumber]] === "undefined") {
-            result[modifiedBallot[placeNumber]] = 1;
+            result[modifiedBallot[placeNumber]] = ballotBox[ballotBoxKeys[i]].count;
          } else {
-            result[modifiedBallot[placeNumber]]++;
+            result[modifiedBallot[placeNumber]] += ballotBox[ballotBoxKeys[i]].count;
          }
       }
 
@@ -70,6 +44,8 @@ const createBallotBox = function() {
    const eliminateCandidate = function(candidateNumber) {
       if (typeof candidateNumber === "undefined") {
          throw new Error("argument candidateNumber is undefined.");
+      } else if (eliminatedCandidates.indexOf(candidateNumber) !== -1) {
+         throw new Error(`candidate ${candidateNumber} has already been eliminated.`);
       } else {
          eliminatedCandidates[eliminatedCandidates.length] = candidateNumber;
       }
@@ -83,12 +59,19 @@ const createBallotBox = function() {
 
       // empties ballotBox (in effect resetting the state of the RCV site)
       resetBallotBox: function() {
-         ballotBox.length = 0;
+         ballotBox = {};
       },
 
       // returns the number of ballots in ballotBox
       getNumBallots: function() {
-         return ballotBox.length;
+         let numBallots = 0;
+         const ballotBoxKeys = Object.keys(ballotBox);
+
+         for (let i = 0; i < ballotBoxKeys.length; i++) {
+            numBallots += ballotBox[ballotBoxKeys[i]].count;
+         }
+
+         return numBallots;
       },
 
       // runs RCV algorithm and returns complete election results
@@ -117,7 +100,7 @@ const createBallotBox = function() {
             }
 
             // determine last place candidate(s)
-            for (let i = 0; i < Object.keys(electionResults["round"+round]).length; i++) {
+            for (let i = 0; i < electionResultsKeys.length; i++) {
                if (minNumofVotes > electionResults["round"+round][i]) {
                   minNumofVotes = electionResults["round"+round][i];
                   losingCandidate.length = 0;
@@ -153,7 +136,23 @@ const createBallotBox = function() {
 
       // adds one user-defined ballot (remember, votes is an array - see comment above createBallot factory function)
       addOneBallot: function(votes) {
-         ballotBox[ballotBox.length] = createBallot(votes);
+         let keyName = "";
+
+         for (let i = 0; i < votes.length - 1; i++) {
+            keyName += `${votes[i]}-`;
+         }
+         keyName += votes[votes.length - 1];
+
+         // conditionally adds a ballot object to the ballot box if that ballot has not yet been added
+         // otherwise, it increments the count for that ballot
+         if (typeof ballotBox[keyName] === "undefined") {
+            ballotBox[keyName] = {
+               count: 1,
+               array: votes
+            };
+         } else {
+            ballotBox[keyName].count++;
+         }
       },
 
       // adds numBallots number of user-defined ballots
@@ -178,7 +177,7 @@ const createBallotBox = function() {
          }
 
          // add scrambled ballot into ballotBox
-         ballotBox[ballotBox.length] = createBallot(ballot);
+         this.addOneBallot(ballot);
       },
 
       // adds numBallots number of randomized ballots, each with numCandidates number of candidates
