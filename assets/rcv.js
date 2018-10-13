@@ -42,12 +42,15 @@ const createBallotBox = function() {
 
    // private method that eliminates a specific candidate on all ballots in ballotBox
    const eliminateCandidate = function(candidateNumber) {
+      // make sure typeof candidateNumber === "number"
+      candidateNumber = Number(candidateNumber);
+
       if (typeof candidateNumber === "undefined") {
          throw new Error("argument candidateNumber is undefined.");
       } else if (eliminatedCandidates.indexOf(candidateNumber) !== -1) {
          throw new Error(`candidate ${candidateNumber} has already been eliminated.`);
       } else {
-         eliminatedCandidates[eliminatedCandidates.length] = Number(candidateNumber);
+         eliminatedCandidates[eliminatedCandidates.length] = candidateNumber;
       }
    }
 
@@ -94,6 +97,9 @@ const createBallotBox = function() {
                if (electionResults["round"+round][electionResultsKeys[i]] > winThreshold) {
                   winnerExists = true;
                   electionResults.winner = Number(electionResultsKeys[i]);
+                  
+                  // by resetting the state of eliminatedCandidates before returning,
+                  // we ensure the perceived idempotence of the computeRCV method
                   this.resetEliminatedCandidates();
                   return electionResults;
                }
@@ -126,7 +132,7 @@ const createBallotBox = function() {
                eliminateCandidate(loser);
                electionResults["round"+round].eliminatedThisRound = loser;
             } else {
-               eliminateCandidate(losingCandidate[0]);
+               eliminateCandidate(Number(losingCandidate[0]));
                electionResults["round"+round].eliminatedThisRound = Number(losingCandidate[0]);
             }
 
