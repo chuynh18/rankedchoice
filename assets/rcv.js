@@ -47,7 +47,7 @@ const createBallotBox = function() {
       } else if (eliminatedCandidates.indexOf(candidateNumber) !== -1) {
          throw new Error(`candidate ${candidateNumber} has already been eliminated.`);
       } else {
-         eliminatedCandidates[eliminatedCandidates.length] = candidateNumber;
+         eliminatedCandidates[eliminatedCandidates.length] = Number(candidateNumber);
       }
    }
 
@@ -101,12 +101,12 @@ const createBallotBox = function() {
 
             // determine last place candidate(s)
             for (let i = 0; i < electionResultsKeys.length; i++) {
-               if (minNumofVotes > electionResults["round"+round][i]) {
-                  minNumofVotes = electionResults["round"+round][i];
+               if (minNumofVotes > electionResults["round"+round][electionResultsKeys[i]]) {
+                  minNumofVotes = electionResults["round"+round][electionResultsKeys[i]];
                   losingCandidate.length = 0;
-                  losingCandidate[losingCandidate.length] = i;
-               } else if (minNumofVotes === electionResults["round"+round][i]) {
-                  losingCandidate[losingCandidate.length] = i;
+                  losingCandidate[losingCandidate.length] = electionResultsKeys[i];
+               } else if (minNumofVotes === electionResults["round"+round][electionResultsKeys[i]]) {
+                  losingCandidate[losingCandidate.length] = electionResultsKeys[i];
                }
             }
 
@@ -127,7 +127,7 @@ const createBallotBox = function() {
                electionResults["round"+round].eliminatedThisRound = loser;
             } else {
                eliminateCandidate(losingCandidate[0]);
-               electionResults["round"+round].eliminatedThisRound = losingCandidate[0];
+               electionResults["round"+round].eliminatedThisRound = Number(losingCandidate[0]);
             }
 
             round++;
