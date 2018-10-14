@@ -13,15 +13,14 @@ const createBallotBox = function() {
    // e.g. placeNumber === 0 returns the first place candidate, 1 returns the runner-up, etc.
    const tallyVotes = function(placeNumber) {
       const result = {};
-      const ballotBoxKeys = Object.keys(ballotBox);
 
       if (typeof placeNumber === "undefined") {
          console.log("Warning:  argument placeNumber is undefined; defaulting to 0.");
       }
 
       // iterate through ballotBox and tally up the votes
-      for (let i = 0; i < ballotBoxKeys.length; i++) {
-         const currentBallot = ballotBox[ballotBoxKeys[i]].array;
+      for (let ballots in ballotBox) {
+         const currentBallot = ballotBox[ballots].array;
          const modifiedBallot = [];
 
          // ensure we don't count eliminated candidates
@@ -33,9 +32,9 @@ const createBallotBox = function() {
 
          // this is where we actually count votes
          if (typeof result[modifiedBallot[placeNumber]] === "undefined") {
-            result[modifiedBallot[placeNumber]] = ballotBox[ballotBoxKeys[i]].count;
+            result[modifiedBallot[placeNumber]] = ballotBox[ballots].count;
          } else {
-            result[modifiedBallot[placeNumber]] += ballotBox[ballotBoxKeys[i]].count;
+            result[modifiedBallot[placeNumber]] += ballotBox[ballots].count;
          }
       }
 
@@ -44,8 +43,12 @@ const createBallotBox = function() {
 
    // private method that eliminates a specific candidate on all ballots in ballotBox
    const eliminateCandidate = function(candidateNumber) {
-      // explicit type coercion:  make sure typeof candidateNumber === "number"
-      candidateNumber = Number(candidateNumber);
+      if (typeof candidateNumber !== "number") {
+         // explicit type coercion:  make sure typeof candidateNumber === "number"
+         candidateNumber = Number(candidateNumber);
+
+         console.log("Warning:  argument candidateNumber was not type number.  It has been coerced into a number, but unexpected behavior may occur.");
+      }
 
       if (typeof candidateNumber === "undefined") {
          throw new Error("argument candidateNumber is undefined.");
@@ -56,7 +59,7 @@ const createBallotBox = function() {
       }
    }
 
-   // object to be returned with its public methods
+   // ballot box object that will be returned; contains public methods that the view will call
    const self = {
       // ballotBox getter
       getBallotBox: function() {
@@ -71,10 +74,9 @@ const createBallotBox = function() {
       // returns the number of ballots in ballotBox
       getNumBallots: function() {
          let numBallots = 0;
-         const ballotBoxKeys = Object.keys(ballotBox);
 
-         for (let i = 0; i < ballotBoxKeys.length; i++) {
-            numBallots += ballotBox[ballotBoxKeys[i]].count;
+         for (let ballots in ballotBox) {
+            numBallots += ballotBox[ballots].count;
          }
 
          return numBallots;
@@ -97,11 +99,10 @@ const createBallotBox = function() {
             electionResults["round"+round] = tallyVotes(0);
 
             // determine existence and identity of overall winner
-            const electionResultsKeys = Object.keys(electionResults["round"+round]);
-            for (let i = 0; i < electionResultsKeys.length; i++) {
-               if (electionResults["round"+round][electionResultsKeys[i]] > winThreshold) {
+            for (let candidate in electionResults["round"+round]) {
+               if (electionResults["round"+round][candidate] > winThreshold) {
                   winnerExists = true;
-                  electionResults.stats.winner = Number(electionResultsKeys[i]);
+                  electionResults.stats.winner = Number(candidate);
                   electionResults.stats.lastRound = round;
                   electionResults.stats.roundsTaken = round + 1;
                   
@@ -113,13 +114,13 @@ const createBallotBox = function() {
             }
 
             // determine last place candidate(s)
-            for (let i = 0; i < electionResultsKeys.length; i++) {
-               if (minNumofVotes > electionResults["round"+round][electionResultsKeys[i]]) {
-                  minNumofVotes = electionResults["round"+round][electionResultsKeys[i]];
+            for (let candidate in electionResults["round"+round]) {
+               if (minNumofVotes > electionResults["round"+round][candidate]) {
+                  minNumofVotes = electionResults["round"+round][candidate];
                   losingCandidate.length = 0;
-                  losingCandidate[losingCandidate.length] = electionResultsKeys[i];
-               } else if (minNumofVotes === electionResults["round"+round][electionResultsKeys[i]]) {
-                  losingCandidate[losingCandidate.length] = electionResultsKeys[i];
+                  losingCandidate[losingCandidate.length] = candidate;
+               } else if (minNumofVotes === electionResults["round"+round][candidate]) {
+                  losingCandidate[losingCandidate.length] = candidate;
                }
             }
 
@@ -127,8 +128,8 @@ const createBallotBox = function() {
             if (round !== 0) {
                electionResults["round"+round].gain = {};
 
-               for (let i = 0; i < electionResultsKeys.length; i++) {
-                  electionResults["round"+round].gain[electionResultsKeys[i]] = electionResults["round"+round][electionResultsKeys[i]] - electionResults["round"+(round-1)][electionResultsKeys[i]];
+               for (let candidate in electionResults["round"+round]) {
+                  electionResults["round"+round].gain[candidate] = electionResults["round"+round][candidate] - electionResults["round"+(round-1)][candidate];
                }
             }
 
@@ -159,6 +160,12 @@ const createBallotBox = function() {
 
       // adds one user-defined ballot (remember, votes is an array - see comment above createBallot factory function)
       addOneBallot: function(votes) {
+         if (typeof votes === "undefined") {
+            throw new Error("argument is undefined (expected an array)");
+         } else if (!Array.isArray(votes)) {
+            throw new Error("argument is not an array.");
+         }
+
          let keyName = "";
 
          for (let i = 0; i < votes.length - 1; i++) {
