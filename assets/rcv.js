@@ -44,8 +44,8 @@ const createBallotBox = function() {
    // private method that eliminates a specific candidate on all ballots in ballotBox
    const eliminateCandidate = function(candidateNumber) {
       if (typeof candidateNumber !== "number") {
-         // explicit type coercion:  make sure typeof candidateNumber === "number"
-         candidateNumber = Number(candidateNumber);
+         // explicit type coercion:  make sure typeof candidateNumber === "number".  unary + is equivalent to Number()
+         candidateNumber = +(candidateNumber);
 
          console.log("Warning:  type of argument candidateNumber is not number.  It has been coerced into a number, but unexpected behavior may occur.");
       }
@@ -101,7 +101,8 @@ const createBallotBox = function() {
 
             // expose fraction of vote
             for (let candidate in electionResults["round"+round]) {
-               electionResults["round"+round][candidate].votesPercentage = 100 * (electionResults["round"+round][candidate].votes / electionResults.stats.totalBallots).toPrecision(6);
+               // toPrecision(6) to hide floating point artifacts.
+               electionResults["round"+round][candidate].percent = +((100 * (electionResults["round"+round][candidate].votes / electionResults.stats.totalBallots)).toPrecision(6));
             }
 
             // show how much each candidate gained
@@ -116,7 +117,7 @@ const createBallotBox = function() {
             for (let candidate in electionResults["round"+round]) {
                if (electionResults["round"+round][candidate].votes > winThreshold) {
                   winnerExists = true;
-                  electionResults.stats.winner = Number(candidate);
+                  electionResults.stats.winner = +(candidate);
                   electionResults.stats.lastRound = round;
                   electionResults.stats.roundsTaken = round + 1;
                   
@@ -152,11 +153,11 @@ const createBallotBox = function() {
                   }
                }
 
-               eliminateCandidate(Number(loser));
-               electionResults["round"+round].eliminatedCandidate = Number(loser);
+               eliminateCandidate(+(loser));
+               electionResults["round"+round].eliminatedCandidate = +(loser);
             } else {
-               eliminateCandidate(Number(losingCandidate[0]));
-               electionResults["round"+round].eliminatedCandidate = Number(losingCandidate[0]);
+               eliminateCandidate(+(losingCandidate[0]));
+               electionResults["round"+round].eliminatedCandidate = +(losingCandidate[0]);
             }
 
             round++;
