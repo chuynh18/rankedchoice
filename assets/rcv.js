@@ -59,13 +59,13 @@ const createBallotBox = function() {
       }
    }
 
+   // resets the eliminatedCandidates array to []
+   const resetEliminatedCandidates = function() {
+      eliminatedCandidates.length = 0;
+   }
+
    // ballot box object that will be returned; contains public methods that the view will call
    const self = {
-      // ballotBox getter
-      getBallotBox: function() {
-         return ballotBox;
-      },
-
       // empties ballotBox (in effect resetting the state of the RCV site)
       resetBallotBox: function() {
          ballotBox = {};
@@ -83,7 +83,7 @@ const createBallotBox = function() {
       },
 
       // runs RCV algorithm and returns complete election results
-      computeRCV: function() {
+      runRCV: function() {
          const numBallots = this.getNumBallots();
          const winThreshold = numBallots/2;
          let winnerExists = false;
@@ -122,8 +122,8 @@ const createBallotBox = function() {
                   electionResults.stats.roundsTaken = round + 1;
                   
                   // by resetting the state of eliminatedCandidates before returning,
-                  // we ensure the perceived idempotence of the computeRCV method
-                  this.resetEliminatedCandidates();
+                  // we ensure the perceived idempotence of the runRCV method
+                  resetEliminatedCandidates();
                   return electionResults;
                }
             }
@@ -165,7 +165,7 @@ const createBallotBox = function() {
       },
 
       // adds one user-defined ballot (remember, votes is an array - see comment above createBallot factory function)
-      addOneBallot: function(votes) {
+      addBallot: function(votes) {
          if (typeof votes === "undefined") {
             throw new Error("argument is undefined (expected an array)");
          } else if (!Array.isArray(votes)) {
@@ -192,9 +192,9 @@ const createBallotBox = function() {
       },
 
       // adds numBallots number of user-defined ballots
-      addMultipleBallots: function(numBallots, votes) {
+      addBallots: function(numBallots, votes) {
          for (let i = 0; i < numBallots; i++) {
-            this.addOneBallot(votes);
+            this.addBallot(votes);
          }
       },
 
@@ -213,24 +213,23 @@ const createBallotBox = function() {
          }
 
          // add scrambled ballot into ballotBox
-         this.addOneBallot(ballot);
+         this.addBallot(ballot);
       },
 
       // adds numBallots number of randomized ballots, each with numCandidates number of candidates
-      addMultipleRandomBallots: function(numBallots, numCandidates) {
+      addRandomBallots: function(numBallots, numCandidates) {
          for (let i = 0; i < numBallots; i++) {
             this.addRandomBallot(numCandidates);
          }
       },
 
-      // this arguably could be made a private method...  "I'll think about it." - Adam Jensen in Deus Ex:  Human Revolution
-      resetEliminatedCandidates: function() {
-         eliminatedCandidates.length = 0;
-      },
-
       // console.log all ballots in ballotBox
       debugEnumerateVotes: function(force) {
-         console.log(ballotBox);
+         if (Object.keys(ballotBox).length > 1000 && !force) {
+            console.log("Warning:  ballotBox has over 1000 keys.  Run debugEnumerateVotes(true) to force display.")
+         } else {
+            console.log(ballotBox);
+         }
       }
    }
 
