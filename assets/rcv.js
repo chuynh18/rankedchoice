@@ -123,6 +123,15 @@ const createBallotBox = function() {
                }
             }
 
+            // show how much each candidate gained
+            if (round !== 0) {
+               electionResults["round"+round].gain = {};
+
+               for (let i = 0; i < electionResultsKeys.length; i++) {
+                  electionResults["round"+round].gain[electionResultsKeys[i]] = electionResults["round"+round][electionResultsKeys[i]] - electionResults["round"+(round-1)][electionResultsKeys[i]];
+               }
+            }
+
             // handle ties for last place
             // opportunity to make the code more robust by handling repeated ties
             if (losingCandidate.length > 1) {
@@ -138,10 +147,10 @@ const createBallotBox = function() {
                }
 
                eliminateCandidate(loser);
-               electionResults["round"+round].eliminatedThisRound = loser;
+               electionResults["round"+round].eliminatedCandidate = loser;
             } else {
                eliminateCandidate(Number(losingCandidate[0]));
-               electionResults["round"+round].eliminatedThisRound = Number(losingCandidate[0]);
+               electionResults["round"+round].eliminatedCandidate = Number(losingCandidate[0]);
             }
 
             round++;
