@@ -32,9 +32,9 @@ const createBallotBox = function() {
 
          // this is where we actually count votes
          if (typeof result[modifiedBallot[placeNumber]] === "undefined") {
-            result[modifiedBallot[placeNumber]] = ballotBox[ballots].count;
+            result[modifiedBallot[placeNumber]] = {votes: ballotBox[ballots].count};
          } else {
-            result[modifiedBallot[placeNumber]] += ballotBox[ballots].count;
+            result[modifiedBallot[placeNumber]].votes += ballotBox[ballots].count;
          }
       }
 
@@ -84,11 +84,12 @@ const createBallotBox = function() {
 
       // runs RCV algorithm and returns complete election results
       computeRCV: function() {
-         const winThreshold = this.getNumBallots()/2;
+         const numBallots = this.getNumBallots();
+         const winThreshold = numBallots/2;
          let winnerExists = false;
          let round = 0;
          const electionResults = {
-            stats: {totalBallots: this.getNumBallots()}
+            stats: {totalBallots: numBallots}
          };
          
          while (!winnerExists) {
@@ -98,9 +99,22 @@ const createBallotBox = function() {
             // store results of current round into electionResults object
             electionResults["round"+round] = tallyVotes(0);
 
+            // expose fraction of vote
+            for (let candidate in electionResults["round"+round]) {
+               electionResults["round"+round][candidate].votesPercentage = 100 * (electionResults["round"+round][candidate].votes / electionResults.stats.totalBallots);
+            }
+
+            // show how much each candidate gained
+            if (round !== 0) {
+
+               for (let candidate in electionResults["round"+round]) {
+                  electionResults["round"+round][candidate].gain = electionResults["round"+round][candidate].votes - electionResults["round"+(round-1)][candidate].votes;
+               }
+            }
+
             // determine existence and identity of overall winner
             for (let candidate in electionResults["round"+round]) {
-               if (electionResults["round"+round][candidate] > winThreshold) {
+               if (electionResults["round"+round][candidate].votes > winThreshold) {
                   winnerExists = true;
                   electionResults.stats.winner = Number(candidate);
                   electionResults.stats.lastRound = round;
@@ -115,21 +129,12 @@ const createBallotBox = function() {
 
             // determine last place candidate(s)
             for (let candidate in electionResults["round"+round]) {
-               if (minNumofVotes > electionResults["round"+round][candidate]) {
-                  minNumofVotes = electionResults["round"+round][candidate];
+               if (minNumofVotes > electionResults["round"+round][candidate].votes) {
+                  minNumofVotes = electionResults["round"+round][candidate].votes;
                   losingCandidate.length = 0;
                   losingCandidate[losingCandidate.length] = candidate;
-               } else if (minNumofVotes === electionResults["round"+round][candidate]) {
+               } else if (minNumofVotes === electionResults["round"+round][candidate].votes) {
                   losingCandidate[losingCandidate.length] = candidate;
-               }
-            }
-
-            // show how much each candidate gained
-            if (round !== 0) {
-               electionResults["round"+round].gain = {};
-
-               for (let candidate in electionResults["round"+round]) {
-                  electionResults["round"+round].gain[candidate] = electionResults["round"+round][candidate] - electionResults["round"+(round-1)][candidate];
                }
             }
 
@@ -147,8 +152,8 @@ const createBallotBox = function() {
                   }
                }
 
-               eliminateCandidate(loser);
-               electionResults["round"+round].eliminatedCandidate = loser;
+               eliminateCandidate(Number(loser));
+               electionResults["round"+round].eliminatedCandidate = Number(loser);
             } else {
                eliminateCandidate(Number(losingCandidate[0]));
                electionResults["round"+round].eliminatedCandidate = Number(losingCandidate[0]);
