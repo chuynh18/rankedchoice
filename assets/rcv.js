@@ -47,7 +47,7 @@ const createBallotBox = function() {
          // explicit type coercion:  make sure typeof candidateNumber === "number"
          candidateNumber = Number(candidateNumber);
 
-         console.log("Warning:  argument candidateNumber was not type number.  It has been coerced into a number, but unexpected behavior may occur.");
+         console.log("Warning:  type of argument candidateNumber is not number.  It has been coerced into a number, but unexpected behavior may occur.");
       }
 
       if (typeof candidateNumber === "undefined") {
