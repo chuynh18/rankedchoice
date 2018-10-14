@@ -133,9 +133,9 @@ const createBallotBox = function() {
                if (minNumofVotes > electionResults["round"+round][candidate].votes) {
                   minNumofVotes = electionResults["round"+round][candidate].votes;
                   losingCandidate.length = 0;
-                  losingCandidate[losingCandidate.length] = candidate;
+                  losingCandidate[losingCandidate.length] = +candidate; // gotcha!  candidate is a key name, so it's a string.  coercing it back to a number
                } else if (minNumofVotes === electionResults["round"+round][candidate].votes) {
-                  losingCandidate[losingCandidate.length] = candidate;
+                  losingCandidate[losingCandidate.length] = +candidate; // same as above
                }
             }
 
@@ -153,11 +153,11 @@ const createBallotBox = function() {
                   }
                }
 
-               eliminateCandidate(+(loser));
-               electionResults["round"+round].eliminatedCandidate = +(loser);
+               eliminateCandidate(loser);
+               electionResults["round"+round].eliminatedCandidate = loser;
             } else {
-               eliminateCandidate(+(losingCandidate[0]));
-               electionResults["round"+round].eliminatedCandidate = +(losingCandidate[0]);
+               eliminateCandidate(losingCandidate[0]);
+               electionResults["round"+round].eliminatedCandidate = losingCandidate[0];
             }
 
             round++;
