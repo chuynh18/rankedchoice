@@ -101,7 +101,7 @@ const createBallotBox = function() {
 
             // expose fraction of vote
             for (let candidate in electionResults["round"+round]) {
-               electionResults["round"+round][candidate].votesPercentage = 100 * (electionResults["round"+round][candidate].votes / electionResults.stats.totalBallots);
+               electionResults["round"+round][candidate].votesPercentage = 100 * (electionResults["round"+round][candidate].votes / electionResults.stats.totalBallots).toPrecision(6);
             }
 
             // show how much each candidate gained
