@@ -85,7 +85,9 @@ const createBallotBox = function() {
          const winThreshold = this.getNumBallots()/2;
          let winnerExists = false;
          let round = 0;
-         const electionResults = {};
+         const electionResults = {
+            stats: {totalBallots: this.getNumBallots()}
+         };
          
          while (!winnerExists) {
             let minNumofVotes = winThreshold;
@@ -99,7 +101,9 @@ const createBallotBox = function() {
             for (let i = 0; i < electionResultsKeys.length; i++) {
                if (electionResults["round"+round][electionResultsKeys[i]] > winThreshold) {
                   winnerExists = true;
-                  electionResults.winner = Number(electionResultsKeys[i]);
+                  electionResults.stats.winner = Number(electionResultsKeys[i]);
+                  electionResults.stats.lastRound = round;
+                  electionResults.stats.roundsTaken = round + 1;
                   
                   // by resetting the state of eliminatedCandidates before returning,
                   // we ensure the perceived idempotence of the computeRCV method
