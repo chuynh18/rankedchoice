@@ -273,7 +273,7 @@ const createBallotBox = function() {
 
                worker[i].addEventListener('message', function(e) {
                   mergeBallots(e.data);
-                  console.log("Ballots added from thread " + i);
+                  console.log(`Ballots added from thread ${i}.`);
                }, false);
       
                if (i === 0) {
@@ -285,7 +285,7 @@ const createBallotBox = function() {
                   });
                } else {
                   console.log(`Thread ${i} starting work.`);
-                  
+
                   worker[i].postMessage({
                      numBallots: ballotsPerThread,
                      numCandidates: numCandidates
