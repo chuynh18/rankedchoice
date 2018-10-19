@@ -62,8 +62,6 @@ const methods = {
    }
 };
 
-console.log("Does this work here?");
-
 self.addEventListener('message', function(e) {
    var data = e.data;
 

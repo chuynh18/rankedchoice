@@ -64,6 +64,21 @@ const createBallotBox = function() {
       eliminatedCandidates.length = 0;
    }
 
+   // merge ballot objects
+   const mergeBallots = function(anotherBox) {
+      if (typeof anotherBox !== "object") {
+         throw new Error("argument is not an object");
+      } else {
+         for (let ballot in anotherBox) {
+            if (typeof ballotBox[ballot] === "undefined") {
+               ballotBox[ballot] = anotherBox[ballot];
+            } else {
+               ballotBox[ballot].count += anotherBox[ballot].count;
+            }
+         }
+      }
+   }
+
    // ballot box object that will be returned; contains public methods that the view will call
    const self = {
       // empties ballotBox (in effect resetting the state of the RCV site)
@@ -96,6 +111,10 @@ const createBallotBox = function() {
          const electionResults = {
             stats: {totalBallots: numBallots}
          };
+
+         if (numBallots === 0) {
+            throw new Error("No ballots present in ballot box.");
+         }
          
          // WARNING:  be careful when iterating over electionResults.roundN objects.
          // at the end of the while loop, eliminatedCandidate is appended to the roundN object.
@@ -206,6 +225,8 @@ const createBallotBox = function() {
          for (let i = 0; i < numBallots; i++) {
             this.addBallot(votes);
          }
+
+         console.log("Ballots added.");
       },
 
       // adds a randomized ballot for numCandidates number of candidates
@@ -231,21 +252,48 @@ const createBallotBox = function() {
          for (let i = 0; i < numBallots; i++) {
             this.addRandomBallot(numCandidates);
          }
+
+         console.log("Ballots added.");
       },
 
       // same as addRandomBallots, but work is done inside a web worker
-      addRandomBallotsWorker: function(numBallots, numCandidates) {
-         if (window.Worker) {
-            const worker = new Worker("rcvWorker.js");
+      addRandomBallotsWorker: function(numBallots, numCandidates, threads) {
+         if (typeof threads === "undefined") {
+            threads = 1;
+         }
 
-            worker.addEventListener('message', function(e) {
-               console.log('Worker said: ', e);
-            }, false);
-   
-            worker.postMessage({
-               numBallots: numBallots,
-               numCandidates: numCandidates
-            });
+         const ballotsPerThread = Math.floor(numBallots/threads);
+         const remainder = numBallots%threads;
+         const worker = [];
+
+         if (window.Worker) {
+            for (let i = 0; i < threads; i++) {
+
+               worker[i] = new Worker("assets/rcvWorker.js");
+
+               worker[i].addEventListener('message', function(e) {
+                  mergeBallots(e.data);
+                  console.log("Ballots added from thread " + i);
+               }, false);
+      
+               if (i === 0) {
+                  console.log(`Thread ${i} starting work.`);
+
+                  worker[i].postMessage({
+                     numBallots: ballotsPerThread + remainder,
+                     numCandidates: numCandidates
+                  });
+               } else {
+                  console.log(`Thread ${i} starting work.`);
+                  
+                  worker[i].postMessage({
+                     numBallots: ballotsPerThread,
+                     numCandidates: numCandidates
+                  });
+               }
+            }
+
+            
          } else {
             console.log("No web worker support detected.");
          }
