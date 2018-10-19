@@ -258,6 +258,16 @@ const createBallotBox = function() {
 
       // same as addRandomBallots, but work is done inside a web worker
       addRandomBallotsWorker: function(numBallots, numCandidates, threads) {
+         const getNumBallotsInObj = function(obj) {
+            let count = 0;
+
+            for (let keys in obj) {
+               count += obj[keys].count;
+            }
+
+            return count;
+         }
+
          if (typeof threads === "undefined") {
             threads = 1;
          }
@@ -273,18 +283,18 @@ const createBallotBox = function() {
 
                worker[i].addEventListener('message', function(e) {
                   mergeBallots(e.data);
-                  console.log(`Ballots added from thread ${i}.`);
+                  console.log(`${getNumBallotsInObj(e.data)} ballots added from thread ${i}.`);
                }, false);
       
                if (i === 0) {
-                  console.log(`Thread ${i} starting work.`);
+                  console.log(`Thread ${i} starting work:  creating ${ballotsPerThread + remainder} ballots.`);
 
                   worker[i].postMessage({
                      numBallots: ballotsPerThread + remainder,
                      numCandidates: numCandidates
                   });
                } else {
-                  console.log(`Thread ${i} starting work.`);
+                  console.log(`Thread ${i} starting work:  creating ${ballotsPerThread} ballots.`);
 
                   worker[i].postMessage({
                      numBallots: ballotsPerThread,
