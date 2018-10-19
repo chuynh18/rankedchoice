@@ -3,7 +3,7 @@
 // ballot box factory function
 const createBallotBox = function() {
    // holds ballots in a private variable
-   let ballotBox = {};
+   const ballotBox = {};
 
    // holds eliminated candidates
    const eliminatedCandidates = [];
@@ -80,6 +80,11 @@ const createBallotBox = function() {
          }
 
          return numBallots;
+      },
+
+      // returns the number of unique ballots in ballotBox
+      getNumUniqueBallots: function() {
+         return Object.keys(ballotBox).length;
       },
 
       // runs RCV algorithm and returns complete election results
@@ -228,10 +233,28 @@ const createBallotBox = function() {
          }
       },
 
+      // same as addRandomBallots, but work is done inside a web worker
+      addRandomBallotsWorker: function(numBallots, numCandidates) {
+         if (window.Worker) {
+            const worker = new Worker("rcvWorker.js");
+
+            worker.addEventListener('message', function(e) {
+               console.log('Worker said: ', e);
+            }, false);
+   
+            worker.postMessage({
+               numBallots: numBallots,
+               numCandidates: numCandidates
+            });
+         } else {
+            console.log("No web worker support detected.");
+         }
+      },
+
       // console.log all ballots in ballotBox
       debugEnumerateVotes: function(force) {
          if (Object.keys(ballotBox).length > 1000 && !force) {
-            console.log("Warning:  ballotBox has over 1000 unique ballots.  Displaying these ballots may cause your browser to lock up.  Run debugEnumerateVotes(true) to force display.");
+            console.log("Warning:  ballotBox has over 1000 unique ballots.  Displaying these ballots may cause your browser to freeze.  Run debugEnumerateVotes(true) to force display.");
          } else {
             console.log(ballotBox);
          }
