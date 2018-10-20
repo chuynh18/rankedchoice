@@ -258,11 +258,15 @@ const createBallotBox = function() {
 
       // adds numBallots number of randomized ballots, each with numCandidates number of candidates
       addRandomBallotsLegacy: function(numBallots, numCandidates) {
+         const startTime = getTime();
+
          for (let i = 0; i < numBallots; i++) {
             this.addRandomBallot(numCandidates);
          }
 
-         console.log("Ballots added.");
+         const endTime = getTime();
+
+         console.log(`Ballots added.  Operation took ${endTime - startTime} milliseconds`);
       },
 
       // same as addRandomBallotsLegacy, but work is done inside a web worker
