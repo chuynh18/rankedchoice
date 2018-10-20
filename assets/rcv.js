@@ -205,7 +205,7 @@ const createBallotBox = function() {
       },
 
       // adds numBallots number of user-defined ballots
-      addBallots: function(numBallots, votes) {
+      addBallots: function(numBallots, votes, suppress) {
          if (typeof votes === "undefined") {
             throw new Error("argument is undefined (expected an array)");
          } else if (!Array.isArray(votes)) {
@@ -230,12 +230,15 @@ const createBallotBox = function() {
             ballotBox[keyName].count += numBallots;
          }
 
-         console.log("Ballots added.");
+         if (!suppress) {
+            console.log("Ballots added.");
+         }
       },
 
       // adds one user-defined ballot (remember, votes is an array - see comment above createBallot factory function)
       addBallot: function(votes) {
-         this.addBallots(1, votes);
+         this.addBallots(1, votes, true);
+         console.log("Ballot added.");
       },
 
       // adds a randomized ballot for numCandidates number of candidates
@@ -253,7 +256,7 @@ const createBallotBox = function() {
          }
 
          // add scrambled ballot into ballotBox
-         this.addBallots(1, ballot);
+         this.addBallots(1, ballot, true);
       },
 
       // adds numBallots number of randomized ballots, each with numCandidates number of candidates
