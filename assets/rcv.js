@@ -250,17 +250,8 @@ const createBallotBox = function() {
          this.addBallots(1, ballot);
       },
 
-      // adds numBallots number of randomized ballots, each with numCandidates number of candidates
-      addRandomBallots: function(numBallots, numCandidates) {
-         for (let i = 0; i < numBallots; i++) {
-            this.addRandomBallot(numCandidates);
-         }
-
-         console.log("Ballots added.");
-      },
-
       // same as addRandomBallots, but work is done inside a web worker
-      addRandomBallotsWorker: function(numBallots, numCandidates, threads) {
+      addRandomBallots: function(numBallots, numCandidates, threads) {
          const getTime = function() {
             const date = new Date();
             return date.getTime();
