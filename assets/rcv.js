@@ -334,7 +334,7 @@ const createBallotBox = function() {
 
       // console.log all ballots in ballotBox
       debugEnumerateVotes: function(force) {
-         if (Object.keys(ballotBox).length > 1000 && !force) {
+         if (Object.keys(ballotBox).length > 1E3 && !force) {
             console.log("Warning:  ballotBox has over 1000 unique ballots.  Displaying these ballots may cause your browser to freeze.  Run debugEnumerateVotes(true) to force display.");
          } else {
             console.log(ballotBox);
