@@ -3,7 +3,7 @@
 // ballot box factory function
 const createBallotBox = function() {
    // holds ballots in a private variable
-   const ballotBox = {};
+   let ballotBox = {};
 
    // holds eliminated candidates
    const eliminatedCandidates = [];
@@ -79,6 +79,17 @@ const createBallotBox = function() {
       }
    }
 
+   // help keep code DRY
+   const getNumBallotsInObj = function(obj) {
+      let count = 0;
+
+      for (let keys in obj) {
+         count += obj[keys].count;
+      }
+
+      return count;
+   }
+
    // ballot box object that will be returned; contains public methods that the view will call
    const self = {
       // empties ballotBox (in effect resetting the state of the RCV site)
@@ -88,13 +99,7 @@ const createBallotBox = function() {
 
       // returns the number of ballots in ballotBox
       getNumBallots: function() {
-         let numBallots = 0;
-
-         for (let ballots in ballotBox) {
-            numBallots += ballotBox[ballots].count;
-         }
-
-         return numBallots;
+         return getNumBallotsInObj(ballotBox);
       },
 
       // returns the number of unique ballots in ballotBox
@@ -258,15 +263,12 @@ const createBallotBox = function() {
 
       // same as addRandomBallots, but work is done inside a web worker
       addRandomBallotsWorker: function(numBallots, numCandidates, threads) {
-         const getNumBallotsInObj = function(obj) {
-            let count = 0;
-
-            for (let keys in obj) {
-               count += obj[keys].count;
-            }
-
-            return count;
+         const getTime = function() {
+            const date = new Date();
+            return date.getTime();
          }
+
+         const startTime = getTime();
 
          if (typeof threads === "undefined") {
             threads = 1;
@@ -284,6 +286,13 @@ const createBallotBox = function() {
                worker[i].addEventListener('message', function(e) {
                   mergeBallots(e.data);
                   console.log(`${getNumBallotsInObj(e.data)} ballots added from thread ${i}.`);
+
+                  if (i === 0) {
+                     const endTime = getTime();
+                     setTimeout(function() {
+                        console.log(`Operation completed in ${endTime - startTime} milliseconds.`);
+                     }, 100);
+                  }
                }, false);
       
                if (i === 0) {
