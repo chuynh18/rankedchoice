@@ -230,6 +230,7 @@ const createBallotBox = function() {
             ballotBox[keyName].count += numBallots;
          }
 
+         // suppress "Ballots added." message because other methods use addBallots
          if (!suppress) {
             console.log("Ballots added.");
          }
@@ -258,6 +259,7 @@ const createBallotBox = function() {
          // add scrambled ballot into ballotBox
          this.addBallots(1, ballot, true);
 
+         // optionally suppress this console.log statement because addRandomBallotsLegacy runs this method in a for loop
          if (!suppress) {
             console.log("Ballot added.");
          }
@@ -268,35 +270,48 @@ const createBallotBox = function() {
       addRandomBallots: function(numBallots, numCandidates, threads) {
          const startTime = getTime();
 
-         if (typeof threads === "undefined") {
-            threads = 1;
-         } else if (threads > numBallots) {
+         // if threads was manually specified, make sure that it doesn't exceed the number of ballots to be created
+         if (threads > numBallots) {
             threads = numBallots;
             console.log(`Warning, number of threads exceeds number of ballots.  Setting threads to numBallots (${numBallots}).`);
+         } else {
+            // otherwise, if threads isn't specified or invalid, and we're creating fewer than a million ballots, use only one thread
+            if (numBallots < 1E6) {
+               threads = 1;
+            } else {
+               // or use a number of threads equal to the amount of logical processors reported to the browser
+               // if no value is reported, default to 4 threads
+               threads = navigator.hardwareConcurrency || 4;
+            }
          }
 
-         const ballotsPerThread = Math.floor(numBallots/threads);
-         const remainder = numBallots%threads;
+         // figure out how many ballots each thread needs to be responsible for
+         const ballotsPerThread = Math.floor(numBallots / threads);
+         const remainder = numBallots % threads;
          const bigBallot = ballotsPerThread + remainder;
          const worker = [];
 
+         // dole out work to threads (web workers)
          if (window.Worker) {
             for (let i = 0; i < threads; i++) {
 
                worker[i] = new Worker("assets/rcvWorker.js");
 
+               // event listener that listens for the message coming from the web workers when they finish
                worker[i].addEventListener('message', function(e) {
                   mergeBallots(e.data);
                   console.log(`${getNumBallotsInObj(e.data)} ballots added from thread ${i}.`);
 
+                  // We're using thread zero to track operation completion time.  This isn't perfect, but it's good enough.
                   if (i === 0) {
                      const endTime = getTime();
                      setTimeout(function() {
                         console.log(`Operation completed in ${endTime - startTime} milliseconds.`);
-                     }, 100);
+                     }, 125);
                   }
                }, false);
       
+               // Thread zero may be responsible for a tiny number of extra ballots in case numBallots % threads !== 0
                if (i === 0) {
                   console.log(`Thread ${i} starting work:  creating ${bigBallot} ballots.`);
 

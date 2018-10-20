@@ -55,12 +55,13 @@ const methods = {
    }
 };
 
-// the part that actually listens for messages and kicks off the work
+// the part that actually listens for messages coming from the main thread (rcv.js) and kicks off the work
 self.addEventListener('message', function(e) {
    const data = e.data;
 
+   // generate the random ballots
    methods.addRandomBallots(data.numBallots, data.numCandidates);
 
    self.postMessage(ballotBox);
-   self.close();
+   self.close(); // web workers clean up after themselves by terminating
  }, false);
