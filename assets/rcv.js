@@ -250,6 +250,15 @@ const createBallotBox = function() {
          this.addBallots(1, ballot);
       },
 
+      // adds numBallots number of randomized ballots, each with numCandidates number of candidates
+      addRandomBallotsLegacy: function(numBallots, numCandidates) {
+         for (let i = 0; i < numBallots; i++) {
+            this.addRandomBallot(numCandidates);
+         }
+
+         console.log("Ballots added.");
+      },
+
       // same as addRandomBallots, but work is done inside a web worker
       addRandomBallots: function(numBallots, numCandidates, threads) {
          const getTime = function() {
@@ -305,7 +314,8 @@ const createBallotBox = function() {
             }
             
          } else {
-            console.log("No web worker support detected.");
+            console.log("No web worker support detected, adding random ballots on main JS thread.");
+            this.addRandomBallotsLegacy(numBallots, numCandidates);
          }
       },
 
