@@ -290,6 +290,7 @@ const createBallotBox = function() {
          const remainder = numBallots % threads;
          const bigBallot = ballotsPerThread + remainder;
          const worker = [];
+         const endTime = [];
 
          // dole out work to threads (web workers)
          if (window.Worker) {
@@ -300,15 +301,23 @@ const createBallotBox = function() {
                // event listener that listens for the message coming from the web workers when they finish
                worker[i].addEventListener('message', function(e) {
                   mergeBallots(e.data);
-                  console.log(`${getNumBallotsInObj(e.data)} ballots added from thread ${i}.`);
+                  console.log(`Thread ${i} added ${getNumBallotsInObj(e.data)} ballots.`);
 
-                  // We're using thread zero to track operation completion time.  This isn't perfect, but it's good enough.
-                  if (i === 0) {
-                     const endTime = getTime();
-                     setTimeout(function() {
-                        console.log(`Operation completed in ${endTime - startTime} milliseconds.`);
-                     }, 125);
+                  // get true end time, even when multithreaded
+                  endTime[endTime.length] = getTime();
+
+                  if (endTime.length === threads) {
+                     let trueEndTime = endTime[0];
+
+                     for (let i = 1; i < endTime.length; i++) {
+                        if (trueEndTime < endTime[i]) {
+                           trueEndTime = endTime[i];
+                        }
+                     }
+
+                     console.log(`Operation completed in ${trueEndTime - startTime} milliseconds.`);
                   }
+
                }, false);
       
                // Thread zero may be responsible for a tiny number of extra ballots in case numBallots % threads !== 0
