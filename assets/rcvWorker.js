@@ -29,13 +29,6 @@ const methods = {
       }
    },
 
-   // adds numBallots number of user-defined ballots
-   addBallots: function(numBallots, votes) {
-      for (let i = 0; i < numBallots; i++) {
-         this.addBallot(votes);
-      }
-   },
-
    // adds a randomized ballot for numCandidates number of candidates
    addRandomBallot: function(numCandidates) {
       const ballot = [];

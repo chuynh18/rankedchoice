@@ -198,8 +198,8 @@ const createBallotBox = function() {
          }
       },
 
-      // adds one user-defined ballot (remember, votes is an array - see comment above createBallot factory function)
-      addBallot: function(votes) {
+      // adds numBallots number of user-defined ballots
+      addBallots: function(numBallots, votes) {
          if (typeof votes === "undefined") {
             throw new Error("argument is undefined (expected an array)");
          } else if (!Array.isArray(votes)) {
@@ -217,21 +217,19 @@ const createBallotBox = function() {
          // otherwise, it increments the count for that ballot
          if (typeof ballotBox[keyName] === "undefined") {
             ballotBox[keyName] = {
-               count: 1,
+               count: numBallots,
                array: votes
             };
          } else {
-            ballotBox[keyName].count++;
-         }
-      },
-
-      // adds numBallots number of user-defined ballots
-      addBallots: function(numBallots, votes) {
-         for (let i = 0; i < numBallots; i++) {
-            this.addBallot(votes);
+            ballotBox[keyName].count += numBallots;
          }
 
          console.log("Ballots added.");
+      },
+
+      // adds one user-defined ballot (remember, votes is an array - see comment above createBallot factory function)
+      addBallot: function(votes) {
+         this.addBallots(1, votes);
       },
 
       // adds a randomized ballot for numCandidates number of candidates
@@ -249,7 +247,7 @@ const createBallotBox = function() {
          }
 
          // add scrambled ballot into ballotBox
-         this.addBallot(ballot);
+         this.addBallots(1, ballot);
       },
 
       // adds numBallots number of randomized ballots, each with numCandidates number of candidates
@@ -272,6 +270,9 @@ const createBallotBox = function() {
 
          if (typeof threads === "undefined") {
             threads = 1;
+         } else if (threads > numBallots) {
+            threads = numBallots;
+            console.log(`Warning, number of threads exceeds number of ballots.  Setting threads to numBallots (${numBallots}).`);
          }
 
          const ballotsPerThread = Math.floor(numBallots/threads);
@@ -311,7 +312,6 @@ const createBallotBox = function() {
                   });
                }
             }
-
             
          } else {
             console.log("No web worker support detected.");
