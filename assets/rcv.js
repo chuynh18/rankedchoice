@@ -7,6 +7,12 @@ const createBallotBox = function() {
 
    // holds eliminated candidates
    const eliminatedCandidates = [];
+
+   // method to get timestamp
+   const getTime = function() {
+      const date = new Date();
+      return date.getTime();
+   }
    
    // private method that iterates through the ballotBox and tallies up the votes
    // placeNumber is the desired place of the candidate
@@ -259,13 +265,9 @@ const createBallotBox = function() {
          console.log("Ballots added.");
       },
 
-      // same as addRandomBallots, but work is done inside a web worker
+      // same as addRandomBallotsLegacy, but work is done inside a web worker
+      // legacy method is called by this method if web worker support is not detected
       addRandomBallots: function(numBallots, numCandidates, threads) {
-         const getTime = function() {
-            const date = new Date();
-            return date.getTime();
-         }
-
          const startTime = getTime();
 
          if (typeof threads === "undefined") {
@@ -277,6 +279,7 @@ const createBallotBox = function() {
 
          const ballotsPerThread = Math.floor(numBallots/threads);
          const remainder = numBallots%threads;
+         const bigBallot = ballotsPerThread + remainder;
          const worker = [];
 
          if (window.Worker) {
@@ -297,10 +300,10 @@ const createBallotBox = function() {
                }, false);
       
                if (i === 0) {
-                  console.log(`Thread ${i} starting work:  creating ${ballotsPerThread + remainder} ballots.`);
+                  console.log(`Thread ${i} starting work:  creating ${bigBallot} ballots.`);
 
                   worker[i].postMessage({
-                     numBallots: ballotsPerThread + remainder,
+                     numBallots: bigBallot,
                      numCandidates: numCandidates
                   });
                } else {
@@ -312,9 +315,8 @@ const createBallotBox = function() {
                   });
                }
             }
-            
          } else {
-            console.log("No web worker support detected, adding random ballots on main JS thread.");
+            console.log("Warning:  No web worker support detected, adding random ballots using legacy method running on main JS thread.");
             this.addRandomBallotsLegacy(numBallots, numCandidates);
          }
       },

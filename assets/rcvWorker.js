@@ -55,12 +55,12 @@ const methods = {
    }
 };
 
+// the part that actually listens for messages and kicks off the work
 self.addEventListener('message', function(e) {
-   var data = e.data;
+   const data = e.data;
 
    methods.addRandomBallots(data.numBallots, data.numCandidates);
 
    self.postMessage(ballotBox);
    self.close();
-
  }, false);
