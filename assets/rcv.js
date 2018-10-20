@@ -242,7 +242,7 @@ const createBallotBox = function() {
       },
 
       // adds a randomized ballot for numCandidates number of candidates
-      addRandomBallot: function(numCandidates) {
+      addRandomBallot: function(numCandidates, suppress) {
          const ballot = [];
 
          // fill ballot with appropriate number of candidates in counting order ([0, 1, 2 ...])
@@ -257,19 +257,10 @@ const createBallotBox = function() {
 
          // add scrambled ballot into ballotBox
          this.addBallots(1, ballot, true);
-      },
 
-      // adds numBallots number of randomized ballots, each with numCandidates number of candidates
-      addRandomBallotsLegacy: function(numBallots, numCandidates) {
-         const startTime = getTime();
-
-         for (let i = 0; i < numBallots; i++) {
-            this.addRandomBallot(numCandidates);
+         if (!suppress) {
+            console.log("Ballot added.");
          }
-
-         const endTime = getTime();
-
-         console.log(`Ballots added.  Operation took ${endTime - startTime} milliseconds`);
       },
 
       // same as addRandomBallotsLegacy, but work is done inside a web worker
@@ -326,6 +317,19 @@ const createBallotBox = function() {
             console.log("Warning:  No web worker support detected, adding random ballots using legacy method running on main JS thread.");
             this.addRandomBallotsLegacy(numBallots, numCandidates);
          }
+      },
+
+      // adds numBallots number of randomized ballots, each with numCandidates number of candidates
+      addRandomBallotsLegacy: function(numBallots, numCandidates) {
+         const startTime = getTime();
+
+         for (let i = 0; i < numBallots; i++) {
+            this.addRandomBallot(numCandidates, true);
+         }
+
+         const endTime = getTime();
+
+         console.log(`Ballots added.  Operation took ${endTime - startTime} milliseconds.`);
       },
 
       // console.log all ballots in ballotBox
