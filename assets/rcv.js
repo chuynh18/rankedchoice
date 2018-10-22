@@ -96,6 +96,17 @@ const createBallotBox = function() {
       return count;
    }
 
+   // generates an array containing numbers from 0 to n-1
+   const buildArray = function(n) {
+      const output = [];
+
+      for (let i = 0; i < n; i++) {
+         output[output.length] = i;
+      }
+
+      return output;
+   }
+
    // ballot box object that will be returned; contains public methods that the view will call
    const self = {
       // empties ballotBox (in effect resetting the state of the RCV site)
@@ -244,12 +255,7 @@ const createBallotBox = function() {
 
       // adds a randomized ballot for numCandidates number of candidates
       addRandomBallot: function(numCandidates, suppress) {
-         const ballot = [];
-
-         // fill ballot with appropriate number of candidates in counting order ([0, 1, 2 ...])
-         for (let i = 0; i < numCandidates; i++) {
-            ballot[ballot.length] = i;
-         }
+         const ballot = buildArray(numCandidates);
 
          // Fisher-Yates shuffle
          for (let i = numCandidates; i > 0; i--) {
@@ -265,20 +271,83 @@ const createBallotBox = function() {
          }
       },
 
+      // holds result of heapsPermute
+      result: [],
+
+      // thanks to:  http://dsernst.com/2014/12/14/heaps-permutation-algorithm-in-javascript/
+      heapsPermute: function (array, n) {
+
+         const swap = function (array, pos1, pos2) {
+            [ array[pos1], array[pos2] ] = [ array[pos2], array[pos1] ];
+         };
+      
+         n = n || array.length; // set n default to array.length
+      
+         if (n === 1) {
+            this.result[this.result.length] = [...array];
+         } else {
+            for (let i = 1; i <= n; i += 1) {
+               let j;
+      
+               this.heapsPermute(array, n - 1);
+      
+               if (n % 2) {
+                  j = 1;
+               } else {
+                  j = i;
+               }
+      
+               swap(array, j - 1, n - 1); // -1 to account for javascript zero-indexing
+            }
+         }
+      
+         return this.result;
+      },
+
       // same as addRandomBallotsLegacy, but work is done inside a web worker
       // legacy method is called by this method if web worker support is not detected
       addRandomBallots: function(numBallots, numCandidates, threads) {
          const startTime = getTime();
 
-         // try to use a sane number of threads based on input parameters
-         if (typeof threads !== "number") {
-            if (numCandidates <= 8) {
+         // a two-dimensional array holding all permutations of possible ballots
+         let permutations;
+
+         // generate permutations on main thread, pass permutations array to worker threads
+         if (numCandidates <= 7) {
+            permutations = this.heapsPermute(buildArray(numCandidates));
+            console.log(`Permutations generated in ${getTime() - startTime} milliseconds.`);
+
+            // try to use a sane number of threads if no explicit value was assigned
+            if (typeof threads !== "number") {
                if (numBallots < 1E7) {
                   threads = 1; // because 1 thread is actually faster for this number of ballots and candidates
                } else {
                   threads = navigator.hardwareConcurrency || 4;
                }
-            } else if (numCandidates > 8) {
+            }
+         
+         // for 8 and 9 candidates, it's still faster to pre-generate permutations, but it's faster to have the worker threads do the generation
+         } else if (numCandidates === 8 || numCandidates === 9) {
+            // permutations array is large, so rather than copying it, let's have all worker threads generate it instead
+            permutations = true;
+            console.log("Building permutations locally on each worker thread.");
+
+            // try to use a sane number of threads if no explicit value was assigned
+            if (typeof threads !== "number") {
+               if (numBallots < 1E7) {
+                  threads = 1; // because 1 thread is actually faster for this number of ballots and candidates
+               } else {
+                  threads = navigator.hardwareConcurrency || 4;
+               }
+            }
+            
+         // for 10 or more candidates, it's faster to just brute force generate ballots one by one
+         // but don't generate too many ballots!  only generate a few million at most.
+         } else {
+            permutations = null;
+
+            // try to use a sane number of threads if no explicit value was assigned
+            if (typeof threads !== "number") {
                if (numBallots < 1E5) {
                   threads = 1;
                } else {
@@ -328,14 +397,16 @@ const createBallotBox = function() {
 
                   worker[i].postMessage({
                      numBallots: bigBallot,
-                     numCandidates: numCandidates
+                     numCandidates: numCandidates,
+                     ballotPossibilities: permutations
                   });
                } else {
                   console.log(`Thread ${i} starting work:  creating ${ballotsPerThread} ballots.`);
 
                   worker[i].postMessage({
                      numBallots: ballotsPerThread,
-                     numCandidates: numCandidates
+                     numCandidates: numCandidates,
+                     ballotPossibilities: permutations
                   });
                }
             }

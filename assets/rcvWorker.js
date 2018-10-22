@@ -2,13 +2,24 @@
 
 const ballotBox = {};
 
-// factorial (used to determine which algorithm to generate many ballots)
+// factorial function
 const factorial = function(n) {
    for (let i = n - 1; i > 1; i--) {
       n *= i;
    }
 
    return n;
+}
+
+// generates an array containing numbers from 0 to n-1
+const buildArray = function(n) {
+   const output = [];
+
+   for (let i = 0; i < n; i++) {
+      output[output.length] = i;
+   }
+
+   return output;
 }
 
 // used to generate random ballots - faster if numCandidates is high (~9 and up or so?)
@@ -42,12 +53,7 @@ const methods = {
 
    // adds a randomized ballot for numCandidates number of candidates
    addRandomBallot: function(numCandidates) {
-      const ballot = [];
-
-      // fill ballot with appropriate number of candidates in counting order ([0, 1, 2 ...])
-      for (let i = 0; i < numCandidates; i++) {
-         ballot[ballot.length] = i;
-      }
+      const ballot = buildArray(numCandidates);
 
       // Fisher-Yates shuffle
       for (let i = numCandidates; i > 0; i--) {
@@ -72,17 +78,8 @@ const methods = {
 // because it has to pre-generate all ballot possibilities, there is too much upfront work when numCandidates is large
 // pardon the messy code, I just wanted to get this working
 const alternateMethods = {
+   // holds result of heapsPermute
    result: [],
-
-   buildArray: function(n) {
-      const output = [];
-
-      for (let i = 0; i < n; i++) {
-         output[output.length] = i;
-      }
-
-      return output;
-   },
 
    // thanks to:  http://dsernst.com/2014/12/14/heaps-permutation-algorithm-in-javascript/
    heapsPermute: function (array, n) {
@@ -134,15 +131,21 @@ const alternateMethods = {
 self.addEventListener('message', function(e) {
    const data = e.data;
 
-   if (data.numCandidates > 8) {
+   // if data.ballotPossibilities is null, use brute force method of random ballot generation
+   if (!data.ballotPossibilities) {
       // generate the random ballots - faster for higher numbers of candidates
       methods.addRandomBallots(data.numBallots, data.numCandidates);
+   
+   // if data.ballotPossibilities === true, pregenerate ballot permutations on the worker thread, then do random number generation
+   } else if (data.ballotPossibilities === true) {
+      const permutations = alternateMethods.heapsPermute(buildArray(data.numCandidates));
+      alternateMethods.buildObject(permutations);
+      alternateMethods.generateBallots(data.numBallots, factorial(data.numCandidates));
 
+   // otherwise, data.ballotPossibilities is a 2D array of ballot permutations; no need to generate ballot permutations on the worker threads
    } else {
       // generate random ballots - INSANELY faster for low numbers of candidates
-      const defaultBallot = alternateMethods.buildArray(data.numCandidates);
-      const allPossibilities = alternateMethods.heapsPermute(defaultBallot);
-      alternateMethods.buildObject(allPossibilities);
+      alternateMethods.buildObject(data.ballotPossibilities);
       alternateMethods.generateBallots(data.numBallots, factorial(data.numCandidates));
    }
 
