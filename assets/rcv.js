@@ -275,7 +275,6 @@ const createBallotBox = function() {
             if (numCandidates <= 8) {
                if (numBallots < 1E7) {
                   threads = 1; // because 1 thread is actually faster for this number of ballots and candidates
-                  threads = navigator.hardwareConcurrency || 4;
                } else {
                   threads = navigator.hardwareConcurrency || 4;
                }
