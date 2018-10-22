@@ -8,7 +8,7 @@ const createBallotBox = function() {
    // holds eliminated candidates
    const eliminatedCandidates = [];
 
-   // method to get timestamp
+   // method to get timestamp in millis
    const getTime = function() {
       const date = new Date();
       return date.getTime();

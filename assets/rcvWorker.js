@@ -2,6 +2,17 @@
 
 const ballotBox = {};
 
+// factorial (used to determine which algorithm to generate many ballots)
+const factorial = function(n) {
+   for (let i = n - 1; i > 1; i--) {
+      n *= i;
+   }
+
+   return n;
+}
+
+// used to generate random ballots - faster if numCandidates is high (~9 and up or so?)
+// works by generating individual ballots and putting them into the ballot box
 const methods = {
    addBallot: function(votes) {
       if (typeof votes === "undefined") {
@@ -55,13 +66,86 @@ const methods = {
    }
 };
 
+// also used to generate random ballots, WAAAAAAAAY faster for low numbers of candidates
+// creates a ballot box with all ballot possibilities pre-represented
+// then generates random numbers between 0 to (numCandidate! - 1) in order to generate random ballots
+// because it has to pre-generate all ballot possibilities, there is too much upfront work when numCandidates is large
+// pardon the messy code, I just wanted to get this working
+const alternateMethods = {
+   result: [],
+
+   buildArray: function(n) {
+      const output = [];
+
+      for (let i = 0; i < n; i++) {
+         output[output.length] = i;
+      }
+
+      return output;
+   },
+
+   // thanks to:  http://dsernst.com/2014/12/14/heaps-permutation-algorithm-in-javascript/
+   heapsPermute: function (array, n) {
+
+      const swap = function (array, pos1, pos2) {
+         [ array[pos1], array[pos2] ] = [ array[pos2], array[pos1] ];
+      };
+   
+      n = n || array.length; // set n default to array.length
+   
+      if (n === 1) {
+         this.result[this.result.length] = [...array];
+      } else {
+         for (let i = 1; i <= n; i += 1) {
+            let j;
+   
+            this.heapsPermute(array, n - 1);
+   
+            if (n % 2) {
+               j = 1;
+            } else {
+               j = i;
+            }
+   
+            swap(array, j - 1, n - 1); // -1 to account for javascript zero-indexing
+         }
+      }
+   
+      return this.result;
+   },
+
+   buildObject: function(input) {
+      for (let i = 0; i < input.length; i++) {
+         ballotBox[i] = {
+            count: 0,
+            array: input[i]
+         }
+      }
+   },
+
+   generateBallots: function(numBallots, ballotPossibilities) {
+      for (let i = 0; i < numBallots; i++) {
+         ballotBox[Math.floor(Math.random() * ballotPossibilities)].count++;
+      }
+   }
+};
+
 // the part that actually listens for messages coming from the main thread (rcv.js) and kicks off the work
 self.addEventListener('message', function(e) {
    const data = e.data;
 
-   // generate the random ballots
-   methods.addRandomBallots(data.numBallots, data.numCandidates);
+   if (data.numCandidates > 8) {
+      // generate the random ballots - faster for higher numbers of candidates
+      methods.addRandomBallots(data.numBallots, data.numCandidates);
+
+   } else {
+      // generate random ballots - INSANELY faster for low numbers of candidates
+      const defaultBallot = alternateMethods.buildArray(data.numCandidates);
+      const allPossibilities = alternateMethods.heapsPermute(defaultBallot);
+      alternateMethods.buildObject(allPossibilities);
+      alternateMethods.generateBallots(data.numBallots, factorial(data.numCandidates));
+   }
 
    self.postMessage(ballotBox);
    self.close(); // web workers clean up after themselves by terminating
- }, false);
+}, false);
