@@ -270,12 +270,11 @@ const createBallotBox = function() {
       addRandomBallots: function(numBallots, numCandidates, threads) {
          const startTime = getTime();
 
-         // try to use a sane number of threads
+         // try to use a sane number of threads based on input parameters
          if (typeof threads !== "number") {
             if (numCandidates <= 8) {
                if (numBallots < 1E7) {
-                  threads = 1;
-               } else {
+                  threads = 1; // because 1 thread is actually faster for this number of ballots and candidates
                   threads = navigator.hardwareConcurrency || 4;
                }
             } else if (numCandidates > 8) {
