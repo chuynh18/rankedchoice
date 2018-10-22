@@ -270,18 +270,20 @@ const createBallotBox = function() {
       addRandomBallots: function(numBallots, numCandidates, threads) {
          const startTime = getTime();
 
-         // if threads was manually specified, make sure that it doesn't exceed the number of ballots to be created
-         if (threads > numBallots) {
-            threads = numBallots;
-            console.log(`Warning, number of threads exceeds number of ballots.  Setting threads to numBallots (${numBallots}).`);
-         } else {
-            // otherwise, if threads isn't specified or invalid, and we're creating fewer than a million ballots, use only one thread
-            if (numBallots < 1E6) {
-               threads = 1;
-            } else {
-               // or use a number of threads equal to the amount of logical processors reported to the browser
-               // if no value is reported, default to 4 threads
-               threads = navigator.hardwareConcurrency || 4;
+         // try to use a sane number of threads
+         if (typeof threads !== "number") {
+            if (numCandidates <= 8) {
+               if (numBallots < 1E7) {
+                  threads = 1;
+               } else {
+                  threads = navigator.hardwareConcurrency || 4;
+               }
+            } else if (numCandidates > 8) {
+               if (numBallots < 1E5) {
+                  threads = 1;
+               } else {
+                  threads = navigator.hardwareConcurrency || 4;
+               }
             }
          }
 
