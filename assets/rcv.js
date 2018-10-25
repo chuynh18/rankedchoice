@@ -13,6 +13,9 @@ const createBallotBox = function() {
       const date = new Date();
       return date.getTime();
    }
+
+   // variable to store permutations that heapsPermute builds
+   const heapsPermuteResult = [];
    
    // private method that iterates through the ballotBox and tallies up the votes
    // placeNumber is the desired place of the candidate
@@ -271,9 +274,6 @@ const createBallotBox = function() {
          }
       },
 
-      // holds result of heapsPermute
-      result: [],
-
       // thanks to:  http://dsernst.com/2014/12/14/heaps-permutation-algorithm-in-javascript/
       heapsPermute: function (array, n) {
 
@@ -284,7 +284,7 @@ const createBallotBox = function() {
          n = n || array.length; // set n default to array.length
       
          if (n === 1) {
-            this.result[this.result.length] = [...array];
+            heapsPermuteResult[heapsPermuteResult.length] = [...array];
          } else {
             for (let i = 1; i <= n; i += 1) {
                let j;
@@ -301,7 +301,7 @@ const createBallotBox = function() {
             }
          }
       
-         return this.result;
+         return heapsPermuteResult;
       },
 
       // same as addRandomBallotsLegacy, but work is done inside a web worker
@@ -314,6 +314,9 @@ const createBallotBox = function() {
 
          // generate permutations on main thread, pass permutations array to worker threads
          if (numCandidates <= 7) {
+            // clean heapsPermuteResult before running heapsPermute
+            heapsPermuteResult.length = 0;
+
             permutations = this.heapsPermute(buildArray(numCandidates));
             console.log(`Permutations generated in ${getTime() - startTime} milliseconds.`);
 
