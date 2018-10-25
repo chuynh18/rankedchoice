@@ -53,7 +53,7 @@ The data in the object returned by box.runRCV() will be useful in generating the
 ## I just want to see the RCV magic work.  Wat do?
 
 No problem.
-* Launch a browser (Chrome and Firefox have nicer dev tools than Edge) and navigate to [https://chuynh18.github.io/rankedchoice/](https://chuynh18.github.io/rankedchoice/), then hit the F12 key to open your browser's developer tools.
+* Launch any browser (though note that Chrome and Firefox have nicer dev tools than Edge) and navigate to [https://chuynh18.github.io/rankedchoice/](https://chuynh18.github.io/rankedchoice/), then hit the F12 key to open your browser's developer tools.
 * In your dev tools, click the "Console" button.
 * Type in `box.addRandomBallots(10000000,5);` then press enter.  Congratulations!  You've just generated ten million random ballots for five candidates.
 * When the above operation has completed (it should complete fairly quickly), type in `box.runRCV();`.  You'll get one short line of text; click the little triangle to the left of that text, and then click the triangles next to the words _round0_, _round1_, _round2_, _round3_, and _stats_.

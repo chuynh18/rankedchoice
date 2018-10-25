@@ -32,12 +32,7 @@ const methods = {
          throw new Error("argument is not an array.");
       }
 
-      let keyName = "";
-
-      for (let i = 0; i < votes.length - 1; i++) {
-         keyName += `${votes[i]}-`;
-      }
-      keyName += votes[votes.length - 1];
+      let keyName = votes.join("-");
 
       // conditionally adds a ballot object to the ballot box if that ballot has not yet been added
       // otherwise, it increments the count for that ballot
