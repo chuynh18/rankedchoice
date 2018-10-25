@@ -47,8 +47,8 @@ const methods = {
    },
 
    // adds a randomized ballot for numCandidates number of candidates
-   addRandomBallot: function(numCandidates, ballotArray) {
-      const ballot = ballotArray;
+   addRandomBallot: function(numCandidates) {
+      const ballot = buildArray(numCandidates);
 
       // Fisher-Yates shuffle
       for (let i = numCandidates; i > 0; i--) {
@@ -61,10 +61,8 @@ const methods = {
 
    // adds numBallots number of randomized ballots, each with numCandidates number of candidates
    addRandomBallots: function(numBallots, numCandidates) {
-      const ballot = buildArray(numCandidates);
-
       for (let i = 0; i < numBallots; i++) {
-         this.addRandomBallot(numCandidates, ballot);
+         this.addRandomBallot(numCandidates);
       }
    }
 };
