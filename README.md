@@ -49,3 +49,13 @@ All _candidate_ keys in rounds other than _round0_ will contain the following ke
 * _gain_, representing the number of votes the candidate gained from the candidate who was eliminated in the previous round.
 
 The data in the object returned by box.runRCV() will be useful in generating the graphs to help illustrate how the RCV process works.  While additional data may be necessary, this should be all we need to make an interesting minimally viable product.
+
+## I just want to see the RCV magic work.  Wat do?
+
+No problem.
+* Launch a browser (Chrome and Firefox have nicer dev tools than Edge) and navigate to [https://chuynh18.github.io/rankedchoice/](https://chuynh18.github.io/rankedchoice/), then hit the F12 key to open your browser's developer tools.
+* In your dev tools, click the "Console" button.
+* Type in `box.addRandomBallots(10000000,5);` then press enter.  Congratulations!  You've just generated ten million random ballots for five candidates.
+* When the above operation has completed (it should complete fairly quickly), type in `box.runRCV();`.  You'll get one short line of text; click the little triangle to the left of that text, and then click the triangles next to the words _round0_, _round1_, _round2_, _round3_, and _stats_.
+
+What you see is an [object](https://www.w3schools.com/js/js_objects.asp) containing the results for an election that just occurred, where the ten million ballots you generated were counted.  _round0_ through _round3_ represent the four rounds that it took for the winner of the election to be determined.  _0_, _1_, _2_, _3_, and _4_ represent the five candidates who participated in this election.  (We _can_ and _will_ give them more endearing names, but that's not the responsibility of this code to do so.)  The rest of the data contained in the object should be fairly straightforward.
