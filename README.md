@@ -14,7 +14,7 @@ Currently, all the necessary RCV logic is complete enough to build a first-pass 
 
 ### How to generate ballots manually
 
-Use the box.addBallots(_numBallots_, _[ballot]_) method.
+Use the `box.addBallots(numBallots, [ballot])` method.
 * _numBallots_ is a natural number (1, 2, 3...) representing how many ballots you wish to put into the ballot box.
 * _[ballot]_ is an array of natural numbers starting from 0.  Its length is the number of candidates you wish to have exist, while the order of its elements are the order of preference for the candidates.
 * As an example, calling `box.addBallots(1000, [0, 1, 2, 3]);` would add one thousand identical ballots to the ballot box that are voting for candidate 0 as the first choice, candidate 1 as the second choice, candidate 2 as the third choice, and candidate 3 as the fourth choice.
@@ -22,22 +22,22 @@ Use the box.addBallots(_numBallots_, _[ballot]_) method.
 
 ### How to generate ballots randomly
 
-Use the box.addRandomBallots(_numBallots_, _numCandidates_) method.
+Use the `box.addRandomBallots(numBallots, numCandidates)` method.
 * As with the manual method, _numBallots_ is a natural number (1, 2, 3...) representing how many ballots you wish to put into the ballot box.
 * _numCandidates_ is a natural number representing the number of candidates you wish to have on the ballot.
 * This method will always generate ballots that are permutations of [0, 1, 2, ..., n-2, n-1] for _numCandidates_ === n.
 
 ### How to view the current contents of the ballot box
 
-Use the box.debugEnumerateVotes() method.  This will simply console.log out the value of the ballot box.
+Use the `box.debugEnumerateVotes()` method.  This will simply console.log out the value of the ballot box.
 
 ### How to reset the ballot box
 
-Use the box.resetBallotBox() method.  This method is useful to call if we want to allow the user to rerun the RCV simulation.
+Use the `box.resetBallotBox()` method.  This method is useful to call if we want to allow the user to rerun the RCV simulation.
 
 ### How to compute the results of Ranked Choice Voting
 
-Use the box.runRCV() method.  This will take the current ballot box and compute the winner of the election.  The return value of this method is an object showing the results of each round of the RCV process.  Keys are of the format _round0_, _round1_, ... _roundN_.  There is also a _stats_ key that exposes info about the entire election, such as ballots casted, number of rounds taken to determine a winner, and the election winner.
+Use the `box.runRCV()` method.  This will take the current ballot box and compute the winner of the election.  The return value of this method is an object showing the results of each round of the RCV process.  Keys are of the format _round0_, _round1_, ... _roundN_.  There is also a _stats_ key that exposes info about the entire election, such as ballots casted, number of rounds taken to determine a winner, and the election winner.
 
 All _round_ keys will have keys representing candidates that are still in the running.  All candidate keys in all rounds will have the following keys:
 * _votes_, representing the number of votes the candidate has earned in that round.
