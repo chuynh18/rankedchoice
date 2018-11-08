@@ -25,6 +25,7 @@ header {
 }
 
 .box {
+   background-color: #fdfdfd;
    border: solid 1px black;
    padding: 3px 0;
 }

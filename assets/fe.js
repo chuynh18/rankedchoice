@@ -2,7 +2,7 @@
 
 const frontEndMethods = {
    showBallotBoxStats: function() {
-      document.getElementById("boxState").textContent = `Ballot box contains ${box.getNumBallots()} ballots and ${box.getNumUniqueBallots()} unique ballots.`;
+      document.getElementById("boxState").innerHTML = `Ballot box contains <strong>${box.getNumBallots()} ballots</strong> and <strong>${box.getNumUniqueBallots()} unique ballots</strong>.`;
    },
 
    createDefinedBallots: function() {

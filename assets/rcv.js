@@ -115,6 +115,8 @@ const createBallotBox = function() {
       // empties ballotBox (in effect resetting the state of the RCV site)
       resetBallotBox: function() {
          ballotBox = {};
+
+         console.log("Ballot box emptied.");
       },
 
       // returns the number of ballots in ballotBox
