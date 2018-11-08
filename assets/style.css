@@ -1,0 +1,56 @@
+* {
+   margin: 0;
+   padding: 0;
+}
+
+body {
+   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+   width: 90%;
+   margin: 0 auto;
+   background-color: #f1f1f1;
+}
+
+header {
+   text-align: center;
+}
+
+.spacer {
+   margin: 20px 0;
+}
+
+.line {
+   margin: 7px auto;
+   width: 97%;
+   border-bottom: solid 1px gray;
+}
+
+.box {
+   border: solid 1px black;
+   padding: 3px 0;
+}
+
+.box-title {
+   font-size: 18pt;
+   font-weight: bold;
+}
+
+.cp-item {
+   margin: 0 auto;
+   width: 97%;
+}
+
+.cp-item-title {
+   width: 250px;
+}
+
+.ib {
+   display: inline-block;
+}
+
+.debugField {
+   width: 200px;
+}
+
+#runRCV {
+   width: 50px;
+}

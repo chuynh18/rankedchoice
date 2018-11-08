@@ -106,18 +106,18 @@ const alternateMethods = {
       return this.result;
    },
 
-   buildObject: function(input) {
+   buildObject: function(input, numCandidates) {
       for (let i = 0; i < input.length; i++) {
-         ballotBox[i] = {
+         ballotBox[`${numCandidates}-${i}`] = {
             count: 0,
             array: input[i]
          }
       }
    },
 
-   generateBallots: function(numBallots, ballotPossibilities) {
+   generateBallots: function(numBallots, ballotPossibilities, numCandidates) {
       for (let i = 0; i < numBallots; i++) {
-         ballotBox[Math.floor(Math.random() * ballotPossibilities)].count++;
+         ballotBox[`${numCandidates}-${Math.floor(Math.random() * ballotPossibilities)}`].count++;
       }
    }
 };
@@ -134,14 +134,14 @@ self.addEventListener('message', function(e) {
    // if data.ballotPossibilities === true, pregenerate ballot permutations on the worker thread, then do random number generation
    } else if (data.ballotPossibilities === true) {
       const permutations = alternateMethods.heapsPermute(buildArray(data.numCandidates));
-      alternateMethods.buildObject(permutations);
-      alternateMethods.generateBallots(data.numBallots, factorial(data.numCandidates));
+      alternateMethods.buildObject(permutations, data.numCandidates);
+      alternateMethods.generateBallots(data.numBallots, factorial(data.numCandidates), data.numCandidates);
 
    // otherwise, data.ballotPossibilities is a 2D array of ballot permutations; no need to generate ballot permutations on the worker threads
    } else {
       // generate random ballots - INSANELY faster for low numbers of candidates
-      alternateMethods.buildObject(data.ballotPossibilities);
-      alternateMethods.generateBallots(data.numBallots, factorial(data.numCandidates));
+      alternateMethods.buildObject(data.ballotPossibilities, data.numCandidates);
+      alternateMethods.generateBallots(data.numBallots, factorial(data.numCandidates), data.numCandidates);
    }
 
    self.postMessage(ballotBox);

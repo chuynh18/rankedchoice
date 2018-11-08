@@ -8,12 +8,48 @@
       <link rel="shortcut icon" type="image/png" href="assets/favicon.png" />
    </head>
    <body>
-      <div id="control-panel">
+      <header class="spacer">
+         <h1>Ranked Choice Voting</h1>
+      </header>
 
+      <div class="spacer box" id="control-panel">
+         <div class="cp-item">
+            <span class="box-title">Debug panel</span>
+         </div>
+
+         <div class="line"></div>
+
+         <div class="cp-item">
+            <div class="cp-item-title ib">Add ballots manually:</div>
+
+         </div>
+
+         <div class="cp-item">
+            <div class="cp-item-title ib">Add randomly generated ballots:</div>
+            <input class="debugField" type="number" placeholder="Enter num of ballots" id="numRandomBallots">
+            <input class="debugField" type="number" placeholder="Enter num of candidates" id="numRandomCandidates">
+            <button id="randomBallotsButton" title="Warning:  performance greatly decreases as number of candidates increases.  Performance is extremely slow for 10 or more candidates!" onclick="frontEndMethods.createRandomBallots();">Create ballots</button>
+         </div>
+
+         <div class="line"></div>
+
+         <div class="cp-item">
+            <div class="cp-item-title ib">Ballot box state:</div>
+            <div class="ib" id="boxState"></div>
+         </div>
+
+         <div class="line"></div>
+         
+         <div class="cp-item">
+            <div class="cp-item-title ib">Compute election:</div>
+            <button id="runRCV" title="Click this button to compute the results of the election." onclick="frontEndMethods.renderRCV();">Go!</button>
+         </div>
       </div>
 
-      <div id="results-panel">
-
+      <div class="spacer box" id="results-panel">
+         <div class="cp-item">
+            <span class="box-title">Results panel</span>
+         </div>
       </div>
 
       <script src="assets/rcv.js"></script>
