@@ -153,25 +153,26 @@ const createBallotBox = function() {
             const losingCandidate = [];
 
             // store results of current round into electionResults object
-            electionResults["round"+round] = tallyVotes(0);
+            electionResults["round"+round] = {};
+            electionResults["round"+round].result = tallyVotes(0);
 
             // expose fraction of vote
-            for (let candidate in electionResults["round"+round]) {
+            for (let candidate in electionResults["round"+round].result) {
                // toPrecision(6) to hide floating point artifacts.
-               electionResults["round"+round][candidate].percent = +((100 * (electionResults["round"+round][candidate].votes / electionResults.stats.totalBallots)).toPrecision(6));
+               electionResults["round"+round].result[candidate].percent = +((100 * (electionResults["round"+round].result[candidate].votes / electionResults.stats.totalBallots)).toPrecision(6));
             }
 
             // show how much each candidate gained
             if (round !== 0) {
 
-               for (let candidate in electionResults["round"+round]) {
-                  electionResults["round"+round][candidate].gain = electionResults["round"+round][candidate].votes - electionResults["round"+(round-1)][candidate].votes;
+               for (let candidate in electionResults["round"+round].result) {
+                  electionResults["round"+round].result[candidate].gain = electionResults["round"+round].result[candidate].votes - electionResults["round"+(round-1)].result[candidate].votes;
                }
             }
 
             // determine existence and identity of overall winner
-            for (let candidate in electionResults["round"+round]) {
-               if (electionResults["round"+round][candidate].votes > winThreshold) {
+            for (let candidate in electionResults["round"+round].result) {
+               if (electionResults["round"+round].result[candidate].votes > winThreshold) {
                   winnerExists = true;
                   electionResults.stats.winner = +(candidate);
                   electionResults.stats.lastRound = round;
@@ -185,12 +186,12 @@ const createBallotBox = function() {
             }
 
             // determine last place candidate(s)
-            for (let candidate in electionResults["round"+round]) {
-               if (minNumofVotes > electionResults["round"+round][candidate].votes) {
-                  minNumofVotes = electionResults["round"+round][candidate].votes;
+            for (let candidate in electionResults["round"+round].result) {
+               if (minNumofVotes > electionResults["round"+round].result[candidate].votes) {
+                  minNumofVotes = electionResults["round"+round].result[candidate].votes;
                   losingCandidate.length = 0;
                   losingCandidate[losingCandidate.length] = +candidate; // gotcha!  candidate is a key name, so it's a string.  coercing it back to a number
-               } else if (minNumofVotes === electionResults["round"+round][candidate].votes) {
+               } else if (minNumofVotes === electionResults["round"+round].result[candidate].votes) {
                   losingCandidate[losingCandidate.length] = +candidate; // same as above
                }
             }
