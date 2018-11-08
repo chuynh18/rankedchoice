@@ -44,6 +44,10 @@ header {
    width: 250px;
 }
 
+.sm-spacer-bottom {
+   margin-bottom: 9px;
+}
+
 .ib {
    display: inline-block;
 }
