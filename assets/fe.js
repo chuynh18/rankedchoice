@@ -1,12 +1,47 @@
 "use strict";
 
 const frontEndMethods = {
+
+   // really inelegant method of formatting large numbers with commas
+   addCommas: function(input) {
+      let comma = false;
+      let counter = 0;
+      let reversedOutput = "";
+      let output = "";
+
+      if (input.length > 3) {
+         comma = true;
+      }
+
+      for (let i = input.length-1; i >= 0; i--) {
+         reversedOutput += input[i];
+         counter++;
+
+         if (counter % 3 === 0 && comma && i !== 0) {
+            reversedOutput += ",";
+         }
+      }
+
+      for (let i = reversedOutput.length-1; i >= 0; i--) {
+         output += reversedOutput[i];
+      }
+
+      return output;
+   },
+
    showBallotBoxStats: function() {
-      document.getElementById("boxState").innerHTML = `Ballot box contains a total of <strong>${box.getNumBallots()} ballots</strong> and <strong>${box.getNumUniqueBallots()} unique ballots</strong>.`;
+      const ballots = box.getNumBallots().toString();
+      const uniqueBallots = box.getNumUniqueBallots().toString();
+
+      document.getElementById("boxState").innerHTML = `Ballot box contains a total of <strong>${this.addCommas(ballots)} ballots</strong> and <strong>${this.addCommas(uniqueBallots)} unique ballots</strong>.`;
    },
 
    createDefinedBallots: function() {
-
+      // this is a thing of beauty (sarcasm)
+      const ballot = document.getElementById("manualBallot").value.split(",").map(item => parseInt(item));
+      const numBallots = parseInt(document.getElementById("numManualBallots").value);
+      
+      box.addBallots(numBallots, ballot);
    },
 
    createRandomBallots: function() {
