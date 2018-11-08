@@ -20,8 +20,8 @@
 
          <div class="line"></div>
 
-         <div class="cp-item">
-            <div class="cp-item-title ib sm-spacer-bottom">Add ballots manually:</div>
+         <div class="cp-item sm-spacer-bottom">
+            <div class="cp-item-title ib">Add ballots manually:</div>
             <input class="debugField" type="number" placeholder="Enter num of ballots" id="numManualBallots">
             <input class="debugField" placeholder="Enter ballot (comma separated integers)" title="Enter comma-separated integers starting from 0.  The integer value represents the candidate; the order the integer appears in represents the desired rank of the candidate." id="manualBallot">
             <button id="manualBallotsButton" title="Inserts specified number of the desired ballot." onclick="frontEndMethods.createDefinedBallots();">Create ballots</button>

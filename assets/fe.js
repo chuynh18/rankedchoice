@@ -53,7 +53,7 @@ const frontEndMethods = {
       } else if (Number.isNaN(numBallots) || Number.isNaN(numCandidates)) {
          throw new Error("numBallots and numCandidates must be valid numbers.");
       } else {
-         if ((numCandidates > 9 && numBallots > 1E6) || (numCandidates > 8 && numBallots > 1E7) || (numCandidates > 7 && numBallots > 7E8) || (numBallots > 1E8)) {
+         if ((numCandidates > 9 && numBallots > 1E6) || (numCandidates > 8 && numBallots > 1E7) || (numCandidates > 7 && numBallots > 7E8) || (numBallots > 3E9)) {
             const proceed = confirm("Warning: this operation may take a while.  Proceed?");
 
             if (proceed) {
