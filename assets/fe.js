@@ -41,7 +41,7 @@ const frontEndMethods = {
       const ballot = document.getElementById("manualBallot").value.split(",").map(item => parseInt(item));
       const numBallots = parseInt(document.getElementById("numManualBallots").value);
       
-      box.addBallots(numBallots, ballot);
+      box.addBallots(numBallots, ballot, false, this.showBallotBoxStats.bind(frontEndMethods));
    },
 
    createRandomBallots: function() {
@@ -57,10 +57,10 @@ const frontEndMethods = {
             const proceed = confirm("Warning: this operation may take a while.  Proceed?");
 
             if (proceed) {
-               box.addRandomBallots(numBallots, numCandidates);
+               box.addRandomBallots(numBallots, numCandidates, this.showBallotBoxStats.bind(frontEndMethods));
             }
          } else {
-            box.addRandomBallots(numBallots, numCandidates);
+            box.addRandomBallots(numBallots, numCandidates, this.showBallotBoxStats.bind(frontEndMethods));
          }
       }
       
@@ -74,9 +74,5 @@ const frontEndMethods = {
    }
 };
 
-// suboptimal... but we'll take it for now
+// run this method once so page starts out by showing 0 ballots and 0 unique ballots
 frontEndMethods.showBallotBoxStats();
-
-setInterval(function() {
-   frontEndMethods.showBallotBoxStats();
-}, 1500);

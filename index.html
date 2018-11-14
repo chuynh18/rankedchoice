@@ -22,15 +22,15 @@
 
          <div class="cp-item sm-spacer-bottom">
             <div class="cp-item-title ib">Add ballots manually:</div>
-            <input class="debugField" type="number" placeholder="Enter num of ballots" id="numManualBallots">
-            <input class="debugField" placeholder="Enter ballot (comma separated integers)" title="Enter comma-separated integers starting from 0.  The integer value represents the candidate; the order the integer appears in represents the desired rank of the candidate." id="manualBallot">
+            <input class="debugField" id="numManualBallots" type="number" placeholder="Enter # of ballots">
+            <input class="debugField" id="manualBallot" placeholder="Enter ballot (comma separated integers)" title="Enter comma-separated integers starting from 0.  The integer value represents the candidate; the order the integer appears in represents the desired rank of the candidate.">
             <button id="manualBallotsButton" title="Inserts specified number of the desired ballot." onclick="frontEndMethods.createDefinedBallots();">Create ballots</button>
          </div>
 
          <div class="cp-item">
             <div class="cp-item-title ib">Add randomly generated ballots:</div>
-            <input class="debugField" type="number" placeholder="Enter num of ballots" id="numRandomBallots">
-            <input class="debugField" type="number" placeholder="Enter num of candidates" id="numRandomCandidates">
+            <input class="debugField" id="numRandomBallots" type="number" placeholder="Enter # of ballots" >
+            <input class="debugField" id="numRandomCandidates" type="number" placeholder="Enter # of candidates">
             <button id="randomBallotsButton" title="Warning:  performance greatly decreases as number of candidates increases.  Performance is extremely slow for 10 or more candidates!" onclick="frontEndMethods.createRandomBallots();">Create ballots</button>
          </div>
 

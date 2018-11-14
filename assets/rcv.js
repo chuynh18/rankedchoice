@@ -222,7 +222,7 @@ const createBallotBox = function() {
       },
 
       // adds numBallots number of user-defined ballots
-      addBallots: function(numBallots, votes, suppress) {
+      addBallots: function(numBallots, votes, suppress, callback) {
          if (typeof votes === "undefined") {
             throw new Error("argument is undefined (expected an array)");
          } else if (!Array.isArray(votes)) {
@@ -245,6 +245,11 @@ const createBallotBox = function() {
          // suppress "Ballots added." message because other methods use addBallots
          if (!suppress) {
             console.log("Ballots added.");
+         }
+
+         // run callback function if provided (to update DOM)
+         if (callback) {
+            callback();
          }
       },
 
@@ -304,10 +309,10 @@ const createBallotBox = function() {
 
       // same as addRandomBallotsLegacy, but work is done inside a web worker
       // legacy method is called by this method if web worker support is not detected
-      addRandomBallots: function(numBallots, numCandidates, threads) {
+      addRandomBallots: function(numBallots, numCandidates, callback, threads) {
          const startTime = getTime();
 
-         // a two-dimensional array holding all permutations of possible ballots
+         // a two-dimensional array holding all possible ballot permutations
          let permutations;
 
          // generate permutations on main thread, pass permutations array to worker threads
@@ -375,6 +380,11 @@ const createBallotBox = function() {
                   mergeBallots(e.data);
                   console.log(`Thread ${i} added ${getNumBallotsInObj(e.data)} ballots.`);
 
+                  // run callback function if provided (to update DOM)
+                  if (callback) {
+                     callback();
+                  }
+
                   // get true end time, even when multithreaded
                   endTime[endTime.length] = getTime();
 
@@ -413,12 +423,12 @@ const createBallotBox = function() {
             }
          } else {
             console.log("Warning:  No web worker support detected, adding random ballots using legacy method running on main JS thread.");
-            this.addRandomBallotsLegacy(numBallots, numCandidates);
+            this.addRandomBallotsLegacy(numBallots, numCandidates, callback);
          }
       },
 
       // adds numBallots number of randomized ballots, each with numCandidates number of candidates
-      addRandomBallotsLegacy: function(numBallots, numCandidates) {
+      addRandomBallotsLegacy: function(numBallots, numCandidates, callback) {
          const startTime = getTime();
 
          for (let i = 0; i < numBallots; i++) {
@@ -428,6 +438,11 @@ const createBallotBox = function() {
          const endTime = getTime();
 
          console.log(`Ballots added.  Operation took ${endTime - startTime} milliseconds.`);
+
+         // run callback function if provided (to update DOM)
+         if (callback) {
+            callback();
+         }
       },
 
       // console.log all ballots in ballotBox
@@ -440,7 +455,8 @@ const createBallotBox = function() {
       }
    }
 
-   return self;
+   // return frozen self object (we don't want its methods overwritten or tampered with)
+   return Object.freeze(self);
 }
 
 // create ballot box object as "box"

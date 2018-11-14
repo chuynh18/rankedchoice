@@ -63,3 +63,21 @@ header {
 #manualBallot {
    width: 300px;
 }
+
+@media only screen and (max-width: 1111px) {
+   body {
+      width: 99.5%;
+   }
+}
+
+@media only screen and (max-width: 890px) {
+   #manualBallot {
+      width: 250px;
+   }
+}
+
+@media only screen and (max-width: 835px) {
+   .debugField {
+      width: 125px;
+   }
+}
