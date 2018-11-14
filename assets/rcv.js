@@ -1,7 +1,7 @@
 "use strict";
 
-// ballot box factory function
-const createBallotBox = function() {
+// ballot box factory IIFE
+const box = (function() {
    // holds ballots in a private variable
    let ballotBox = {};
 
@@ -110,8 +110,8 @@ const createBallotBox = function() {
       return output;
    }
 
-   // ballot box object that will be returned; contains public methods that the view will call
-   const self = {
+   // frozen ballot box object - these represent the immutable public methods
+   return Object.freeze({
       // empties ballotBox (in effect resetting the state of the RCV site)
       resetBallotBox: function() {
          ballotBox = {};
@@ -453,11 +453,5 @@ const createBallotBox = function() {
             console.log(ballotBox);
          }
       }
-   }
-
-   // return frozen self object (we don't want its methods overwritten or tampered with)
-   return Object.freeze(self);
-}
-
-// create ballot box object as "box"
-const box = createBallotBox();
+   });
+})();
