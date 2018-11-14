@@ -19,7 +19,7 @@ header {
 }
 
 .line {
-   margin: 7px auto;
+   margin: 10px auto;
    width: 97%;
    border-bottom: solid 1px gray;
 }
@@ -72,12 +72,16 @@ header {
 
 @media only screen and (max-width: 890px) {
    #manualBallot {
-      width: 250px;
+      width: 240px;
    }
 }
 
-@media only screen and (max-width: 835px) {
+@media only screen and (max-width: 830px) {
    .debugField {
       width: 125px;
+   }
+
+   #numRandomCandidates {
+      width: 150px;
    }
 }

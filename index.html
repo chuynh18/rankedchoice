@@ -38,7 +38,7 @@
 
          <div class="cp-item">
             <div class="cp-item-title ib">Reset ballot box:</div>
-            <button id="emptyBox" title="Resets the ballot box by deleting all ballots." onclick="box.resetBallotBox();">Delete all ballots</button>
+            <button id="emptyBox" title="Resets the ballot box by deleting all ballots." onclick="box.resetBallotBox();frontEndMethods.showBallotBoxStats();">Delete all ballots</button>
          </div>
 
          <div class="line"></div>
@@ -59,11 +59,13 @@
       <div class="spacer box" id="results-panel">
          <div class="cp-item">
             <div class="box-title">Results panel</div>
-            <div><em>Nothing to see here yet!</em></div>
+            <div><em>Nothing to see here...</em></div>
+            <svg></svg>
          </div>
       </div>
 
       <script src="assets/rcv.js"></script>
+      <script src="assets/d3.min.js"></script>
       <script src="assets/fe.js"></script>
    </body>
 
