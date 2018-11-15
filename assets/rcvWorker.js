@@ -1,5 +1,10 @@
 "use strict";
 
+// rcvWorker.js consists of the appropriate methods copied from rcv.js
+// this is not ideal but oh well (because not DRY)
+// I guess there's no helping it, though...  we need these methods on the main thread, too
+// ... in the event that we're running on a browser that does not support web workers
+
 const ballotBox = {};
 
 // factorial function

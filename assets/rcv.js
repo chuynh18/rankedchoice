@@ -333,7 +333,7 @@ const box = (function() {
             }
          
          // for 8 and 9 candidates, it's still faster to pre-generate permutations, but it's faster to have the worker threads do the generation
-         } else if (numCandidates === 8 || numCandidates === 9) {
+         } else if (numCandidates === 8) {
             // permutations array is large, so rather than copying it, let's have all worker threads generate it instead
             permutations = true;
             console.log("Building permutations locally on each worker thread.");

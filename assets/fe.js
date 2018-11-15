@@ -1,28 +1,52 @@
 "use strict";
 
 const frontEndMethods = (function() {
-   // really inelegant method of formatting large numbers with commas
+   // inelegant method of formatting large numbers with commas
    const addCommas = function(input) {
-      let comma = false;
-      let counter = 0;
-      let reversedOutput = "";
+      const inputLength = input.length;
       let output = "";
 
-      if (input.length > 3) {
-         comma = true;
+      for (let i = 0; i < inputLength; i++) {
+         output += input[i];
+
+         if (input.length > 3 && i !== inputLength - 1) {
+            if (((inputLength - 2) % 3 === 0 && (i + 2) % 3 === 0) 
+            || ((inputLength - 1) % 3 === 0 && (i % 3 === 0))
+            || (inputLength % 3 === 0 && (i + 1) % 3 === 0 && i > 0)) {
+               output += ",";
+            }
+         } 
       }
 
-      for (let i = input.length-1; i >= 0; i--) {
-         reversedOutput += input[i];
-         counter++;
+      return output;
+   }
 
-         if (counter % 3 === 0 && comma && i !== 0) {
-            reversedOutput += ",";
+   // takes election results object from rcv.js and returns data in a useful format for d3js (array of objects)
+   const formatElectionData = function(electionResults) {
+      const output = [];
+
+      const electionResultsRounds = Object.keys(electionResults).length - 1;
+
+      for (let i = 0; i < electionResultsRounds; i++) {
+         const oneRound = [];
+
+         for (let candidate in electionResults[`round${i}`].result) {
+            const candidateObject = {
+               name: candidate,
+               votes: electionResults[`round${i}`].result[candidate].votes,
+               gain: 0
+            };
+
+            if (electionResults[`round${i}`].result[candidate].gain) {
+               candidateObject.gain = electionResults[`round${i}`].result[candidate].gain;
+            }
+
+            candidateObject.votesFromLastRound = candidateObject.votes - candidateObject.gain;
+
+            oneRound[oneRound.length] = candidateObject;
          }
-      }
 
-      for (let i = reversedOutput.length-1; i >= 0; i--) {
-         output += reversedOutput[i];
+         output[output.length] = oneRound;
       }
 
       return output;
@@ -70,9 +94,10 @@ const frontEndMethods = (function() {
       renderRCV: function() {
          // save results of election
          const electionResults = box.runRCV();
+         const d3ElectionResults = formatElectionData(box.runRCV());
 
          // hardcode round 0 for now
-         const round0 = electionResults.round0.result;
+         const round0 = d3ElectionResults[0];
 
          // ======= d3js stuff begins =======
          const svg = d3.select("svg")
@@ -83,7 +108,10 @@ const frontEndMethods = (function() {
          const barChart = svg.selectAll("rect")
          // ======= end d3js stuff =======
 
+         console.log("Election results object returned by rcv.js:");
          console.log(electionResults);
+         console.log("Reformatting the data for consumption by d3js:");
+         console.log(d3ElectionResults);         
       }
    });
 })();
